@@ -1,4 +1,4 @@
-package http
+package web
 
 func filterFlags(content string) string {
 	for i, char := range content {

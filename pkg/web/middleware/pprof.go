@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http/pprof"
 
-	bearHTTP "github.com/nite-coder/blackbear/pkg/http"
+	"github.com/nite-coder/blackbear/pkg/web"
 )
 
 // PPROF is middleware struct
@@ -16,7 +16,7 @@ func NewPPROF() *PPROF {
 }
 
 // Invoke function is a middleware entry
-func (p *PPROF) Invoke(c *bearHTTP.Context, next bearHTTP.HandlerFunc) {
+func (p *PPROF) Invoke(c *web.Context, next web.HandlerFunc) {
 	pprof.Index(c.Writer, c.Request)
 	pprof.Cmdline(c.Writer, c.Request)
 	pprof.Profile(c.Writer, c.Request)

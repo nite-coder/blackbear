@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	bearHTTP "github.com/nite-coder/blackbear/pkg/http"
+	"github.com/nite-coder/blackbear/pkg/web"
 )
 
 // These compression constants are copied from the compress/gzip package.
@@ -31,8 +31,8 @@ const (
 // wrapped in.
 type gzipResponseWriter struct {
 	gz        *gzip.Writer
-	napWriter bearHTTP.ResponseWriter
-	bearHTTP.ResponseWriter
+	napWriter web.ResponseWriter
+	web.ResponseWriter
 }
 
 // Write writes bytes to the gzip.Writer. It will also set the Content-Type
@@ -71,7 +71,7 @@ func NewGzip(level int) *GzipMiddleware {
 }
 
 // Invoke function is a middleware entry
-func (h *GzipMiddleware) Invoke(c *bearHTTP.Context, next bearHTTP.HandlerFunc) {
+func (h *GzipMiddleware) Invoke(c *web.Context, next web.HandlerFunc) {
 	r := c.Request
 	w := c.Writer
 	// Skip compression if the client doesn't accept gzip encoding.

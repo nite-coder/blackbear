@@ -3,7 +3,7 @@ package middleware
 import (
 	"strings"
 
-	bearHTTP "github.com/nite-coder/blackbear/pkg/http"
+	"github.com/nite-coder/blackbear/pkg/web"
 )
 
 // Health is health middleware struct
@@ -16,7 +16,7 @@ func NewHealth() *Health {
 }
 
 // Invoke function is a middleware entry
-func (h *Health) Invoke(c *bearHTTP.Context, next bearHTTP.HandlerFunc) {
+func (h *Health) Invoke(c *web.Context, next web.HandlerFunc) {
 	if strings.EqualFold(c.Request.URL.Path, "/health") {
 		_ = c.String(200, "OK")
 	} else {

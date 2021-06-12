@@ -1,2 +1,2 @@
 # blackbear
-A Go framework to develop your application faster
+A Go framework helps to develop your application faster

@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	bearHTTP "github.com/nite-coder/blackbear/pkg/http"
+	"github.com/nite-coder/blackbear/pkg/web"
 )
 
 const toLower = 'a' - 'A'
@@ -214,7 +214,7 @@ func NewCors(options Options) *Cors {
 }
 
 // Invoke funcion will be called by NapNap
-func (cors *Cors) Invoke(c *bearHTTP.Context, next bearHTTP.HandlerFunc) {
+func (cors *Cors) Invoke(c *web.Context, next web.HandlerFunc) {
 	if c.Request.Method == "OPTIONS" {
 		cors.logf("ServeHTTP: Preflight request")
 		cors.handlePreflight(c.Writer, c.Request)

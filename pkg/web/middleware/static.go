@@ -5,7 +5,7 @@ import (
 	"path"
 	"strings"
 
-	bearHTTP "github.com/nite-coder/blackbear/pkg/http"
+	"github.com/nite-coder/blackbear/pkg/web"
 )
 
 // Static is a middleware handler that serves static files in the given directory/filesystem.
@@ -29,7 +29,7 @@ func NewStatic(dir string) *Static {
 }
 
 // Invoke function is a middleware entry
-func (s *Static) Invoke(c *bearHTTP.Context, next bearHTTP.HandlerFunc) {
+func (s *Static) Invoke(c *web.Context, next web.HandlerFunc) {
 	r := c.Request
 	if r.Method != "GET" && r.Method != "HEAD" {
 		_ = next(c)
