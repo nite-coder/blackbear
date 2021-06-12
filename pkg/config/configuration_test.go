@@ -1,46 +1,64 @@
 package config
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
 	"testing"
 
-	"github.com/nite-coder/blackbear/internal/iofile"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestMain(m *testing.M) {
-	fmt.Println("run")
-	// copy config file to executed file's directory
-	path, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	srcPath := filepath.Join(path, "../../test/config/app_test.yml")
+var (
+	yamlContent = `
+app:
+  id: blackbear
 
-	path, err = os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	dstPath := filepath.Join(filepath.Dir(path), "app.yml")
-	iofile.CopyFile(srcPath, dstPath)
+logs:
+  - name: clog
+    type: console
+    min_level: debug
+  - name: graylog
+    type: gelf
+    min_level: debug
 
-	fmt.Printf("dstpath: %s", dstPath)
-	m.Run()
-	fmt.Println("end")
-}
+datasource:
+  - name1
+  - name2
+  - name3
+
+web:
+  port: 10080
+  ping: true
+`
+)
 
 func TestConfig(t *testing.T) {
-	cfg := Cfg()
+	err := LoadContent(yamlContent)
+	require.NoError(t, err)
 
-	err := cfg.Load()
+	val, err := String("app.id")
 	assert.NoError(t, err)
-
-	val, _ := cfg.String("app.id")
 	assert.Equal(t, "blackbear", val)
 
-	cfg.Set("app.id", "HelloApp")
-	val, _ = cfg.String("app.id")
+	_, err = String("id")
+	assert.ErrorIs(t, ErrKeyNotFound, err)
+
+	noVal := "no id value"
+	val, err = String("id", noVal)
+	assert.NoError(t, err)
+	assert.Equal(t, noVal, val)
+
+	Set("app.id", "HelloApp")
+	val, err = cfg.String("app.id")
+	assert.NoError(t, err)
 	assert.Equal(t, "HelloApp", val)
+
+	int32Result, err := Int32("web.port")
+	assert.NoError(t, err)
+	assert.Equal(t, int32(10080), int32Result)
+}
+
+func TestUnmarshalKey(t *testing.T) {
+	err := LoadContent(yamlContent)
+	require.NoError(t, err)
+
 }

@@ -6,58 +6,61 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
+	"github.com/nite-coder/blackbear/pkg/cast"
 	"gopkg.in/yaml.v3"
 )
 
 var (
-	cfg             = New()
-	defaultFileName = "app.yml"
-	configType      = "yaml"
-	ErrFileNotFound = errors.New("config file was not found")
+	cfg                     = New()
+	ErrFileNotFound         = errors.New("config file was not found")
+	ErrKeyNotFound          = errors.New("key was not found")
+	ErrConfigTypeNotSupport = errors.New("config type is not support")
 )
 
 type Configuration interface {
 	Load() error
+	LoadContent(content string) error
+	FileName() string
+	SetFileName(fileName string)
 	AddPath(path string)
 	String(key string, defaultValue ...string) (string, error)
+	Int32(key string, defaultValue ...int32) (int32, error)
+	UnmarshalKey(key string, interface{}) error
 	Set(key string, val string) error
 }
 
 type Config struct {
-	paths []string
-	mu    sync.RWMutex
-	cache map[string]interface{}
+	content    []byte
+	fileName   string
+	configType string
+	paths      []string
+	mu         sync.RWMutex
+	cache      map[string]interface{}
 }
 
 func New() Configuration {
-	cfg := &Config{
-		mu:    sync.RWMutex{},
-		cache: map[string]interface{}{},
+	cfg := Config{
+		content:    []byte{},
+		fileName:   "app.yml",
+		configType: "yaml",
+		mu:         sync.RWMutex{},
+		cache:      map[string]interface{}{},
 	}
 
-	path, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	cfg.AddPath(filepath.Join(path, "config"))
-	cfg.AddPath(path)
-
-	// load config file from executed file's sub config folder
-	path, err = os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	cfg.AddPath(filepath.Join(path, "config"))
-	cfg.AddPath(filepath.Dir(path))
-
-	return cfg
+	return &cfg
 }
 
-// SetFileName set a new config file name.  The default config file name is "app.yml"
+// FileName return config file name.  The default config file name is "app.yml"
+func (cfg *Config) FileName() string {
+	return cfg.fileName
+}
+
+// SetFileName set a config file name.  The default config file name is "app.yml"
 func (cfg *Config) SetFileName(fileName string) {
-	defaultFileName = fileName
+	cfg.fileName = fileName
 }
 
 // AddPath adds a path to look for config file.
@@ -65,17 +68,45 @@ func (cfg *Config) AddPath(path string) {
 	cfg.paths = append(cfg.paths, path)
 }
 
+// String returns a string type value which has the key.  If the value can't convert to string type,
 func (cfg *Config) String(key string, defaultValue ...string) (string, error) {
 	cfg.mu.RLock()
 	defer cfg.mu.RUnlock()
 
-	val, ok := cfg.cache[key].(string)
-	if !ok {
-		return "", errors.New("the value is not string type")
+	val, found := cfg.cache[key]
+	if !found {
+		if len(defaultValue) > 0 {
+			return defaultValue[0], nil
+		}
+		return "", ErrKeyNotFound
 	}
-	return val, nil
+
+	return cast.ToString(val)
 }
 
+
+func (cfg *Config) UnmarshalKey(key string, interface{}) error {
+	return nil
+}
+
+
+// Int32 returns a int32 type value which has the key.  If the value can't convert to string type,
+func (cfg *Config) Int32(key string, defaultValue ...int32) (int32, error) {
+	cfg.mu.RLock()
+	defer cfg.mu.RUnlock()
+
+	val, found := cfg.cache[key]
+	if !found {
+		if len(defaultValue) > 0 {
+			return defaultValue[0], nil
+		}
+		return 0, ErrKeyNotFound
+	}
+
+	return cast.ToInt32(val)
+}
+
+// Set set a new value with key into config.  If the key doesn't exist, a new key will be created and no error be returned.
 func (cfg *Config) Set(key string, val string) error {
 	cfg.mu.Lock()
 	defer cfg.mu.Unlock()
@@ -87,19 +118,36 @@ func (cfg *Config) Set(key string, val string) error {
 // Load initialize this package. It will load config into cache and get ready to work.  However,
 // if the config file was not found, `ErrFileNotFound` will be returned
 func (cfg *Config) Load() error {
-	var file []byte
 	var err error
+
+	if len(cfg.paths) == 0 {
+		path, err := os.Getwd()
+		if err != nil {
+			panic(err)
+		}
+		cfg.AddPath(filepath.Join(path, "config"))
+		cfg.AddPath(path)
+
+		// load config file from executed file's sub config folder
+		path, err = os.Executable()
+		if err != nil {
+			panic(err)
+		}
+		cfg.AddPath(filepath.Join(path, "config"))
+		cfg.AddPath(filepath.Dir(path))
+	}
+
 	for idx, path := range cfg.paths {
 		// found config file
-		if len(file) > 0 {
+		if len(cfg.content) > 0 {
 			break
 		}
 		if len(path) == 0 {
 			continue
 		}
 
-		configFilePath := filepath.Join(path, defaultFileName)
-		file, err = ioutil.ReadFile(filepath.Clean(configFilePath))
+		configFilePath := filepath.Join(path, cfg.fileName)
+		cfg.content, err = ioutil.ReadFile(filepath.Clean(configFilePath))
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
 				if (idx + 1) == len(cfg.paths) {
@@ -111,10 +159,28 @@ func (cfg *Config) Load() error {
 		}
 	}
 
+	return cfg.start()
+}
+
+// LoadContent reads the content as config file
+func (cfg *Config) LoadContent(content string) error {
+	content = strings.TrimSpace(content)
+	cfg.content = []byte(content)
+	return cfg.start()
+}
+
+func (cfg *Config) start() error {
 	items := map[string]interface{}{}
-	err = yaml.Unmarshal(file, &items)
-	if err != nil {
-		return err
+
+	switch cfg.configType {
+	case "yaml", "yml":
+		err := yaml.Unmarshal(cfg.content, &items)
+		if err != nil {
+			return err
+		}
+	case "json":
+	default:
+		return ErrConfigTypeNotSupport
 	}
 
 	cfg.mu.Lock()
@@ -155,9 +221,4 @@ func (cfg *Config) buildCache(key string, val interface{}) {
 	if ok && myVal != nil {
 		cfg.cache[key] = myVal
 	}
-}
-
-// Cfg return a singleton configuration instance.
-func Cfg() Configuration {
-	return cfg
 }

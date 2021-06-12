@@ -1,7 +1,7 @@
 # 配置管理
 
 ## 介紹
-用來管理配置的模組，目前支援 `yaml`, `json` 的格式
+用來管理配置的模組，目前支援 `yaml` 的格式
 
 ## 讀取屬性的優先順序
 有效順序依照下面排序，數字越小有效等級越高，如果檔案已經被找到將不會繼續往下找尋
@@ -26,7 +26,7 @@ web:
 1. 讀取配置實例
 ```Go
     config.SetFileName("config.yml") // 預設讀取 app.yml 檔名, 手動修改為讀取 config.yml
-    config.SetConfigType("yaml") // 如果檔案沒有附檔名需要設定，支援 yaml, json
+    config.SetConfigType("yaml") // 如果檔案沒有附檔名需要設定，支援 yaml
     err := config.Load() // 如果目錄下都找不到配置檔，ErrFileNotFound 會被回傳
     if err != nil {
         return err
@@ -37,15 +37,14 @@ web:
 
 1. 讀取配置內容
 ```Go
-    err := config.Start()
+    err := config.Load()
     if err != nil {
         return err
     }
-    appID, err := config.Cfg().String("app.id")
+    appID, err := config.String("app.id")
     fmt.Print(appID) // print: blackbear
 
-    port, err := cfg.String("web.port", "10080") // 設定預設值，如果 "web.port" 這個 key 找不到, 就會回傳 "10080"
-
+    port, err := config.String("web.port", "10080") // 設定預設值，如果 "web.port" 這個 key 找不到, 就會回傳 "10080"
     fmt.Print(port) // print: 10080
 ```
 
