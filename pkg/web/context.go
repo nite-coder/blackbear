@@ -15,6 +15,14 @@ import (
 	"strings"
 )
 
+var (
+	ctxKey = &struct {
+		name string
+	}{
+		name: "napnap",
+	}
+)
+
 // Param is a single URL parameter, consisting of a key and a value.
 type Param struct {
 	Key   string
@@ -24,20 +32,20 @@ type Param struct {
 // Context represents the context of the current HTTP request. It holds request and
 // response objects, path, path parameters, data and registered handler.
 type Context struct {
-	NapNap  *NapNap
-	Request *http.Request
-	Writer  ResponseWriter
-	query   url.Values
-	params  []Param
-	store   map[string]interface{}
+	WebServer *WebServer
+	Request   *http.Request
+	Writer    ResponseWriter
+	query     url.Values
+	params    []Param
+	store     map[string]interface{}
 }
 
 // NewContext returns a new context instance
-func NewContext(napnap *NapNap, req *http.Request, writer ResponseWriter) *Context {
+func NewContext(s *WebServer, req *http.Request, writer ResponseWriter) *Context {
 	return &Context{
-		NapNap:  napnap,
-		Request: req,
-		Writer:  writer,
+		WebServer: s,
+		Request:   req,
+		Writer:    writer,
 	}
 }
 
@@ -46,12 +54,12 @@ func (c *Context) Render(code int, viewName string, data interface{}) error {
 	c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
 	c.Writer.WriteHeader(code)
 
-	t, err := c.NapNap.template.Clone()
+	t, err := c.WebServer.template.Clone()
 	if err != nil {
 		return err
 	}
 
-	viewPath := path.Join(c.NapNap.templateRootPath, "views", viewName)
+	viewPath := path.Join(c.WebServer.templateRootPath, "views", viewName)
 	t, err = t.ParseFiles(viewPath)
 	if err != nil {
 		return err
@@ -316,7 +324,7 @@ func (c *Context) RequestHeader(key string) string {
 // StdContext return golang standard context
 func (c *Context) StdContext() context.Context {
 	ctx := c.Request.Context()
-	ctx = newGContext(ctx, c)
+	ctx = context.WithValue(ctx, ctxKey, c)
 	return ctx
 }
 
@@ -364,4 +372,13 @@ func (c *Context) reset(w http.ResponseWriter, req *http.Request) {
 	c.store = nil
 	c.query = nil
 	c.params = nil
+}
+
+// FromContext return a web context from the standard context
+func FromContext(ctx context.Context) (*Context, bool) {
+	val, ok := ctx.Value(ctxKey).(*Context)
+	if ok {
+		return val, ok
+	}
+	return nil, false
 }

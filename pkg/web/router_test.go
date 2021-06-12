@@ -9,18 +9,18 @@ import (
 
 func testRoute(t *testing.T, method string, path string) {
 	passed := false
-	_, w, nap := createTestContext()
+	_, w, s := createTestContext()
 
-	router := newRouter(nap)
+	router := newRouter(s)
 	router.Add(method, path, func(c *Context) error {
 		passed = true
 		c.SetStatus(200)
 		return nil
 	})
-	nap.Use(router)
+	s.Use(router)
 
 	req, _ := http.NewRequest(method, path, nil)
-	nap.ServeHTTP(w, req)
+	s.ServeHTTP(w, req)
 
 	assert.True(t, passed)
 	assert.Equal(t, 200, w.Code)
@@ -36,18 +36,18 @@ func TestRouterStaticRoute(t *testing.T) {
 
 func TestRouterParameterRoute(t *testing.T) {
 	var name string
-	_, w, nap := createTestContext()
+	_, w, s := createTestContext()
 
-	router := newRouter(nap)
+	router := newRouter(s)
 	router.Add(GET, "/users/:name", func(c *Context) error {
 		name = c.Param("name")
 		c.SetStatus(200)
 		return nil
 	})
-	nap.Use(router)
+	s.Use(router)
 
 	req, _ := http.NewRequest("GET", "/users/john", nil)
-	nap.ServeHTTP(w, req)
+	s.ServeHTTP(w, req)
 
 	assert.Equal(t, "john", name)
 	assert.Equal(t, 200, w.Code)
@@ -55,9 +55,9 @@ func TestRouterParameterRoute(t *testing.T) {
 
 func TestRouterMatchAnyRoute(t *testing.T) {
 	var action, helo string
-	_, w, nap := createTestContext()
+	_, w, s := createTestContext()
 
-	router := newRouter(nap)
+	router := newRouter(s)
 	router.Add(GET, "/video/:action1", func(c *Context) error {
 		action = c.Param("action1")
 		c.SetStatus(201)
@@ -78,15 +78,15 @@ func TestRouterMatchAnyRoute(t *testing.T) {
 		return nil
 	})
 
-	nap.Use(router)
+	s.Use(router)
 
 	req, _ := http.NewRequest("GET", "/images/play/ball.jpg", nil)
-	nap.ServeHTTP(w, req)
+	s.ServeHTTP(w, req)
 	assert.Equal(t, "play/ball.jpg", action)
 	assert.Equal(t, 200, w.Code)
 
 	req, _ = http.NewRequest("GET", "/v1/aabbc/images/hapyy-ball.jpg", nil)
-	nap.ServeHTTP(w, req)
+	s.ServeHTTP(w, req)
 	assert.Equal(t, "hapyy-ball.jpg", action)
 	assert.Equal(t, "aabbc", helo)
 	assert.Equal(t, 200, w.Code)

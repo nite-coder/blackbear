@@ -1,37 +1,26 @@
-# NapNap
+# Web
 
-## install
-1. Download and install it:
 
-    ```sh
-    $ go get github.com/jasonsoft/napnap
-    ```
 
-2. Import it in your code:
+## Examples
 
-    ```go
-    import "github.com/jasonsoft/napnap"
-    ```
-
-## Getting Started
-
-#### hello world example
+### hello world
 ```go
 package main
 
 import (
 	"net/http"
-	"github.com/jasonsoft/napnap"
+	"github.com/nite-coder/pkg/web"
 )
 
 func main() {
-	nap := napnap.New()
+	s := web.NewServer()
 
-	nap.Get("/", func(c *napnap.Context) error {
+	s.Get("/", func(c *web.Context) error {
 		return c.String(200, "Hello World")
 	})
 
-	http.ListenAndServe("127.0.0.1:10080", nap)
+    s.Run(":10080")
 }
 ```
 
@@ -40,21 +29,21 @@ func main() {
 package main
 
 import (
-	"github.com/jasonsoft/napnap"
+	"github.com/nite-coder/pkg/web"
 )
 
 func main() {
-	nap := napnap.New()
+	s := web.NewServer()
 
-	nap.Get("/my-get", myHeadEndpoint)
-	nap.Post("/my-post", myPostEndpoint)
-	nap.Put("/my-put", myPutEndpoint)
-	nap.Delete("/my-delete", myDeleteEndpoint)
-	nap.Patch("/my-patch", myPatchEndpoint)
-	nap.Options("/my-options", myOptionsEndpoint)
-	nap.Head("/my-head", myHeadEndpoint)
+	s.Get("/my-get", myHeadEndpoint)
+	s.Post("/my-post", myPostEndpoint)
+	s.Put("/my-put", myPutEndpoint)
+	s.Delete("/my-delete", myDeleteEndpoint)
+	s.Patch("/my-patch", myPatchEndpoint)
+	s.Options("/my-options", myOptionsEndpoint)
+	s.Head("/my-head", myHeadEndpoint)
 
-	http.ListenAndServe("127.0.0.1:10080", nap)
+    s.Run(":10080")
 }
 ```
 
@@ -234,16 +223,3 @@ func main() {
 }
 ```
 
-
-
-## Roadmap
-We are planning to add those features in the future.
-- logging middleware
-
-We support the following features
-- golang standard context 
-- routing features (static, parameterized, any)
-- custom middleware
-- http/2 (https only)
-- rendering
-- json binding

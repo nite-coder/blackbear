@@ -213,7 +213,7 @@ func NewCors(options Options) *Cors {
 	return c
 }
 
-// Invoke funcion will be called by NapNap
+// Invoke funcion will be called by WebServer
 func (cors *Cors) Invoke(c *web.Context, next web.HandlerFunc) {
 	if c.Request.Method == "OPTIONS" {
 		cors.logf("ServeHTTP: Preflight request")

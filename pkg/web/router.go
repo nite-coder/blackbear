@@ -69,14 +69,14 @@ const (
 )
 
 type router struct {
-	nap  *NapNap
-	tree *tree
+	webServer *WebServer
+	tree      *tree
 }
 
 // NewRouter function will create a new router instance
-func newRouter(nap *NapNap) *router {
+func newRouter(s *WebServer) *router {
 	return &router{
-		nap: nap,
+		webServer: s,
 		tree: &tree{
 			rootNode: &node{
 				parent:    nil,
@@ -96,15 +96,15 @@ func (r *router) Invoke(c *Context, next HandlerFunc) {
 
 	var err error
 	if h == nil {
-		if r.nap.NotFoundHandler != nil {
-			err = r.nap.NotFoundHandler(c)
+		if r.webServer.NotFoundHandler != nil {
+			err = r.webServer.NotFoundHandler(c)
 		}
 	} else {
 		err = h(c)
 	}
 
-	if err != nil && r.nap.ErrorHandler != nil {
-		r.nap.ErrorHandler(c, err)
+	if err != nil && r.webServer.ErrorHandler != nil {
+		r.webServer.ErrorHandler(c, err)
 	}
 }
 
