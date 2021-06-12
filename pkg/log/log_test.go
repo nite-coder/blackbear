@@ -19,6 +19,7 @@ type Person struct {
 }
 
 func TestNoHandler(t *testing.T) {
+	log.RemoveAllHandlers()
 	log.Info("no handler 1")
 	log.Warnf("no handler 2")
 }
