@@ -9,6 +9,9 @@ import (
 
 var (
 	yamlContent = `
+app:
+  id: blackbear
+
 logs:
   - name: clog
     type: console
@@ -16,10 +19,12 @@ logs:
   - name: graylog
     type: gelf
     min_level: debug
-  
-app:
-  id: blackbear
-  
+
+datasource:
+  - name1
+  - name2
+  - name3
+
 web:
   port: 10080
   ping: true
@@ -50,4 +55,10 @@ func TestConfig(t *testing.T) {
 	int32Result, err := Int32("web.port")
 	assert.NoError(t, err)
 	assert.Equal(t, int32(10080), int32Result)
+}
+
+func TestUnmarshalKey(t *testing.T) {
+	err := LoadContent(yamlContent)
+	require.NoError(t, err)
+
 }

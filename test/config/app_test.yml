@@ -1,3 +1,6 @@
+app:
+  id: blackbear
+
 logs:
   - name: clog
     type: console
@@ -6,9 +9,12 @@ logs:
     type: gelf
     min_level: debug
 
-app:
-  id: blackbear
 
+
+datasource:
+  - name1
+  - name2
+  - name3
 
 web:
   port: 10080

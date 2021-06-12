@@ -28,6 +28,7 @@ type Configuration interface {
 	AddPath(path string)
 	String(key string, defaultValue ...string) (string, error)
 	Int32(key string, defaultValue ...int32) (int32, error)
+	UnmarshalKey(key string, interface{}) error
 	Set(key string, val string) error
 }
 
@@ -82,6 +83,12 @@ func (cfg *Config) String(key string, defaultValue ...string) (string, error) {
 
 	return cast.ToString(val)
 }
+
+
+func (cfg *Config) UnmarshalKey(key string, interface{}) error {
+	return nil
+}
+
 
 // Int32 returns a int32 type value which has the key.  If the value can't convert to string type,
 func (cfg *Config) Int32(key string, defaultValue ...int32) (int32, error) {
