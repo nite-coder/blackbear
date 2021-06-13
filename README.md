@@ -2,9 +2,9 @@
 A Go light framework helps to develop your application faster
 
 
-[doc-img]: https://godoc.org/github.com/nite-code/blackbear?status.svg
-[doc]: https://pkg.go.dev/github.com/nite-code/blackbear?tab=doc
-[ci-img]: https://github.com/nite-code/blackbear/actions/workflows/build/badge.svg
-[ci]: https://github.com/nite-code/blackbear/actions
-[report-img]: https://goreportcard.com/badge/github.com/nite-code/blackbear
-[report]: https://goreportcard.com/report/github.com/nite-code/blackbear
+[doc-img]: https://godoc.org/github.com/nite-coder/blackbear?status.svg
+[doc]: https://pkg.go.dev/github.com/nite-coder/blackbear?tab=doc
+[ci-img]: https://github.com/nite-coder/blackbear/actions/workflows/build.yml/badge.svg
+[ci]: https://github.com/nite-coder/blackbear/actions
+[report-img]: https://goreportcard.com/badge/github.com/nite-coder/blackbear
+[report]: https://goreportcard.com/report/github.com/nite-coder/blackbear
