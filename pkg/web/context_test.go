@@ -71,7 +71,7 @@ func TestContextSetRespHeader(t *testing.T) {
 func TestContextRedirectWithAbsolutePath(t *testing.T) {
 	c, w, _ := createTestContext()
 	c.Request, _ = http.NewRequest("POST", "http://example.com", nil)
-	c.Redirect(302, "http://google.com")
+	_ = c.Redirect(302, "http://google.com")
 
 	assert.Equal(t, 302, w.Code)
 	assert.Equal(t, w.Header().Get("Location"), "http://google.com")
@@ -81,7 +81,8 @@ func TestContextRedirectWithRelativePath(t *testing.T) {
 	c, w, _ := createTestContext()
 	c.Request, _ = http.NewRequest("POST", "http://example.com", nil)
 
-	c.Redirect(301, "/path")
+	_ = c.Redirect(301, "/path")
+
 	assert.Equal(t, 301, w.Code)
 	assert.Equal(t, w.Header().Get("Location"), "/path")
 }
@@ -103,6 +104,8 @@ func TestContextSetGet(t *testing.T) {
 }
 
 func TestContextSetGetValues(t *testing.T) {
+	var a interface{} = 1
+
 	c, _, _ := createTestContext()
 	c.Set("string", "this is a string")
 	c.Set("int32", int32(-42))
@@ -110,7 +113,6 @@ func TestContextSetGetValues(t *testing.T) {
 	c.Set("uint64", uint64(42))
 	c.Set("float32", float32(4.2))
 	c.Set("float64", 4.2)
-	var a interface{} = 1
 	c.Set("intInterface", a)
 
 	assert.Exactly(t, c.MustGet("string").(string), "this is a string")
@@ -120,7 +122,6 @@ func TestContextSetGetValues(t *testing.T) {
 	assert.Exactly(t, c.MustGet("float32").(float32), float32(4.2))
 	assert.Exactly(t, c.MustGet("float64").(float64), 4.2)
 	assert.Exactly(t, c.MustGet("intInterface").(int), 1)
-
 }
 
 // Tests that the response executes the templates

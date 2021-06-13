@@ -329,11 +329,14 @@ func getStackTrace() string {
 
 	var b strings.Builder
 	frames := runtime.CallersFrames(stack)
+
 	for {
 		frame, more := frames.Next()
+
 		if !strings.Contains(frame.File, "runtime/") {
 			_, _ = b.WriteString(fmt.Sprintf("\n\tFile: %s, Line: %d. Function: %s", frame.File, frame.Line, frame.Function))
 		}
+
 		if !more {
 			break
 		}

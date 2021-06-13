@@ -8,18 +8,9 @@ import (
 	"sync"
 
 	"github.com/fatih/color"
-	"github.com/nite-coder/blackbear/pkg/log"
 	colorable "github.com/mattn/go-colorable"
+	"github.com/nite-coder/blackbear/pkg/log"
 )
-
-var colors = []*color.Color{
-	log.DebugLevel: color.New(color.FgWhite),
-	log.InfoLevel:  color.New(color.FgBlue),
-	log.WarnLevel:  color.New(color.FgYellow),
-	log.ErrorLevel: color.New(color.FgRed),
-	log.FatalLevel: color.New(color.FgRed),
-	log.PanicLevel: color.New(color.FgRed),
-}
 
 func levelToColor(level string) *color.Color {
 	switch level {
@@ -62,6 +53,7 @@ func (h *Console) BeforeWriting(e *log.Entry) error {
 func (h *Console) Write(bytes []byte) error {
 	kv := map[string]interface{}{}
 	err := json.Unmarshal(bytes, &kv)
+
 	if err != nil {
 		return err
 	}
@@ -72,14 +64,16 @@ func (h *Console) Write(bytes []byte) error {
 
 	// sort map by key
 	keys := make([]string, 0, len(kv))
+
 	for k := range kv {
 		if k == "level" || k == "msg" {
 			continue
 		}
+
 		keys = append(keys, k)
 	}
-	sort.Strings(keys)
 
+	sort.Strings(keys)
 	// fmt is not goroutine safe
 	// https://stackoverflow.com/questions/14694088/is-it-safe-for-more-than-one-goroutine-to-print-to-stdout
 	h.mutex.Lock()

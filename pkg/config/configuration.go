@@ -78,6 +78,7 @@ func (cfg *Config) String(key string, defaultValue ...string) (string, error) {
 		if len(defaultValue) > 0 {
 			return defaultValue[0], nil
 		}
+
 		return "", ErrKeyNotFound
 	}
 
@@ -98,6 +99,7 @@ func (cfg *Config) Int32(key string, defaultValue ...int32) (int32, error) {
 		if len(defaultValue) > 0 {
 			return defaultValue[0], nil
 		}
+
 		return 0, ErrKeyNotFound
 	}
 
@@ -110,6 +112,7 @@ func (cfg *Config) Set(key string, val string) error {
 	defer cfg.mu.Unlock()
 
 	cfg.cache[key] = val
+
 	return nil
 }
 
@@ -123,6 +126,7 @@ func (cfg *Config) Load() error {
 		if err != nil {
 			panic(err)
 		}
+
 		cfg.AddPath(filepath.Join(path, "config"))
 		cfg.AddPath(path)
 
@@ -131,6 +135,7 @@ func (cfg *Config) Load() error {
 		if err != nil {
 			panic(err)
 		}
+
 		cfg.AddPath(filepath.Join(path, "config"))
 		cfg.AddPath(filepath.Dir(path))
 	}
@@ -140,19 +145,23 @@ func (cfg *Config) Load() error {
 		if len(cfg.content) > 0 {
 			break
 		}
+
 		if len(path) == 0 {
 			continue
 		}
 
 		configFilePath := filepath.Join(path, cfg.fileName)
 		cfg.content, err = ioutil.ReadFile(filepath.Clean(configFilePath))
+
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
 				if (idx + 1) == len(cfg.paths) {
 					return ErrFileNotFound
 				}
+
 				continue
 			}
+
 			return fmt.Errorf("config: read file error: %w", err)
 		}
 	}
@@ -164,6 +173,7 @@ func (cfg *Config) Load() error {
 func (cfg *Config) LoadContent(content string) error {
 	content = strings.TrimSpace(content)
 	cfg.content = []byte(content)
+
 	return cfg.start()
 }
 
@@ -183,6 +193,7 @@ func (cfg *Config) start() error {
 
 	cfg.mu.Lock()
 	defer cfg.mu.Unlock()
+
 	for k, v := range items {
 		cfg.buildCache(k, v)
 	}
@@ -200,8 +211,8 @@ func (cfg *Config) buildCache(key string, val interface{}) {
 		for keyA, valA := range myArray {
 			newKey := fmt.Sprintf("%s[%d]", key, keyA)
 			cfg.buildCache(newKey, valA)
-
 		}
+
 		return
 	}
 
@@ -210,8 +221,8 @@ func (cfg *Config) buildCache(key string, val interface{}) {
 		for keyA, valA := range myMap {
 			newKey := fmt.Sprintf("%s.%s", key, keyA)
 			cfg.buildCache(newKey, valA)
-
 		}
+
 		return
 	}
 

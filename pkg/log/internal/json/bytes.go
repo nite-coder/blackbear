@@ -5,12 +5,14 @@ import "unicode/utf8"
 // AppendBytes is a mirror of appendString with []byte arg
 func (Encoder) AppendBytes(dst, s []byte) []byte {
 	dst = append(dst, '"')
+
 	for i := 0; i < len(s); i++ {
 		if !noEscapeTable[s[i]] {
 			dst = appendBytesComplex(dst, s, i)
 			return append(dst, '"')
 		}
 	}
+
 	dst = append(dst, s...)
 	return append(dst, '"')
 }
@@ -32,6 +34,7 @@ func (Encoder) AppendHex(dst, s []byte) []byte {
 // with []byte arg
 func appendBytesComplex(dst, s []byte, i int) []byte {
 	start := 0
+
 	for i < len(s) {
 		b := s[i]
 		if b >= utf8.RuneSelf {
@@ -40,14 +43,19 @@ func appendBytesComplex(dst, s []byte, i int) []byte {
 				if start < i {
 					dst = append(dst, s[start:i]...)
 				}
+
 				dst = append(dst, `\ufffd`...)
 				i += size
 				start = i
+
 				continue
 			}
+
 			i += size
+
 			continue
 		}
+
 		if noEscapeTable[b] {
 			i++
 			continue
@@ -59,6 +67,7 @@ func appendBytesComplex(dst, s []byte, i int) []byte {
 		if start < i {
 			dst = append(dst, s[start:i]...)
 		}
+
 		switch b {
 		case '"', '\\':
 			dst = append(dst, '\\', b)
@@ -78,8 +87,10 @@ func appendBytesComplex(dst, s []byte, i int) []byte {
 		i++
 		start = i
 	}
+
 	if start < len(s) {
 		dst = append(dst, s[start:]...)
 	}
+
 	return dst
 }

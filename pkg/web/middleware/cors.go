@@ -30,9 +30,11 @@ func (w wildcard) match(s string) bool {
 // convert converts a list of string using the passed converter function
 func convert(s []string, c converter) []string {
 	out := []string{}
+
 	for _, i := range s {
 		out = append(out, c(i))
 	}
+
 	return out
 }
 
@@ -43,12 +45,15 @@ func parseHeaderList(headerList string) []string {
 	upper := true
 	// Estimate the number headers in order to allocate the right splice size
 	t := 0
+
 	for i := 0; i < l; i++ {
 		if headerList[i] == ',' {
 			t++
 		}
 	}
+
 	headers := make([]string, 0, t)
+
 	for i := 0; i < l; i++ {
 		b := headerList[i]
 		if b >= 'a' && b <= 'z' {
@@ -78,6 +83,7 @@ func parseHeaderList(headerList string) []string {
 			upper = b == '-' || b == '_'
 		}
 	}
+
 	return headers
 }
 
@@ -178,7 +184,7 @@ func NewCors(options Options) *Cors {
 				break
 			} else if i := strings.IndexByte(origin, '*'); i >= 0 {
 				// Split the origin in two: start and end string without the *
-				w := wildcard{origin[0:i], origin[i+1 : len(origin)]}
+				w := wildcard{origin[0:i], origin[i+1:]}
 				c.allowedWOrigins = append(c.allowedWOrigins, w)
 			} else {
 				c.allowedOrigins = append(c.allowedOrigins, origin)
@@ -252,37 +258,45 @@ func (cors *Cors) handlePreflight(w http.ResponseWriter, r *http.Request) {
 		cors.logf("  Preflight aborted: empty origin")
 		return
 	}
+
 	if !cors.isOriginAllowed(origin) {
 		cors.logf("  Preflight aborted: origin '%s' not allowed", origin)
 		return
 	}
 
 	reqMethod := r.Header.Get("Access-Control-Request-Method")
+
 	if !cors.isMethodAllowed(reqMethod) {
 		cors.logf("  Preflight aborted: method '%s' not allowed", reqMethod)
 		return
 	}
+
 	reqHeaders := parseHeaderList(r.Header.Get("Access-Control-Request-Headers"))
+
 	if !cors.areHeadersAllowed(reqHeaders) {
 		cors.logf("  Preflight aborted: headers '%v' not allowed", reqHeaders)
 		return
 	}
+
 	headers.Set("Access-Control-Allow-Origin", origin)
 	// Spec says: Since the list of methods can be unbounded, simply returning the method indicated
 	// by Access-Control-Request-Method (if supported) can be enough
 	headers.Set("Access-Control-Allow-Methods", strings.ToUpper(reqMethod))
-	if len(reqHeaders) > 0 {
 
+	if len(reqHeaders) > 0 {
 		// Spec says: Since the list of headers can be unbounded, simply returning supported headers
 		// from Access-Control-Request-Headers can be enough
 		headers.Set("Access-Control-Allow-Headers", strings.Join(reqHeaders, ", "))
 	}
+
 	if cors.allowCredentials {
 		headers.Set("Access-Control-Allow-Credentials", "true")
 	}
+
 	if cors.maxAge > 0 {
 		headers.Set("Access-Control-Max-Age", strconv.Itoa(cors.maxAge))
 	}
+
 	cors.logf("  Preflight response headers: %v", headers)
 }
 
@@ -297,10 +311,12 @@ func (cors *Cors) handleActualRequest(w http.ResponseWriter, r *http.Request) {
 	}
 	// Always set Vary, see https://github.com/rs/cors/issues/10
 	headers.Add("Vary", "Origin")
+
 	if origin == "" {
 		cors.logf("  Actual request no headers added: missing origin")
 		return
 	}
+
 	if !cors.isOriginAllowed(origin) {
 		cors.logf("  Actual request no headers added: origin '%s' not allowed", origin)
 		return
@@ -315,13 +331,17 @@ func (cors *Cors) handleActualRequest(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
 	headers.Set("Access-Control-Allow-Origin", origin)
+
 	if len(cors.exposedHeaders) > 0 {
 		headers.Set("Access-Control-Expose-Headers", strings.Join(cors.exposedHeaders, ", "))
 	}
+
 	if cors.allowCredentials {
 		headers.Set("Access-Control-Allow-Credentials", "true")
 	}
+
 	cors.logf("  Actual response added headers: %v", headers)
 }
 
@@ -338,20 +358,25 @@ func (cors *Cors) isOriginAllowed(origin string) bool {
 	if cors.allowOriginFunc != nil {
 		return cors.allowOriginFunc(origin)
 	}
+
 	if cors.allowedOriginsAll {
 		return true
 	}
+
 	origin = strings.ToLower(origin)
+
 	for _, o := range cors.allowedOrigins {
 		if o == origin {
 			return true
 		}
 	}
+
 	for _, w := range cors.allowedWOrigins {
 		if w.match(origin) {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -362,16 +387,20 @@ func (cors *Cors) isMethodAllowed(method string) bool {
 		// If no method allowed, always return false, even for preflight request
 		return false
 	}
+
 	method = strings.ToUpper(method)
+
 	if method == "OPTIONS" {
 		// Always allow preflight requests
 		return true
 	}
+
 	for _, m := range cors.allowedMethods {
 		if m == method {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -381,17 +410,21 @@ func (cors *Cors) areHeadersAllowed(requestedHeaders []string) bool {
 	if cors.allowedHeadersAll || len(requestedHeaders) == 0 {
 		return true
 	}
+
 	for _, header := range requestedHeaders {
 		header = http.CanonicalHeaderKey(header)
 		found := false
+
 		for _, h := range cors.allowedHeaders {
 			if h == header {
 				found = true
 			}
 		}
+
 		if !found {
 			return false
 		}
 	}
+
 	return true
 }

@@ -25,11 +25,13 @@ func TestNoHandler(t *testing.T) {
 }
 
 func TestAddHandlers(t *testing.T) {
-	log.RemoveAllHandlers()
 	h1 := memory.New()
+
+	log.RemoveAllHandlers()
 	log.AddHandler(h1, log.AllLevels...)
 
 	h2 := memory.New()
+
 	log.AddHandler(h2, log.AllLevels...)
 
 	log.Info("info")
@@ -49,8 +51,9 @@ func (h *ErrHandler) Write(bytes []byte) error {
 }
 
 func TestErrorHandler(t *testing.T) {
-	log.RemoveAllHandlers()
 	h1 := &ErrHandler{}
+
+	log.RemoveAllHandlers()
 	log.AddHandler(h1, log.AllLevels...)
 
 	isErr := false
@@ -120,7 +123,6 @@ func TestLog(t *testing.T) {
 	})
 
 	log.AutoStaceTrace = true
-
 }
 
 func TestContext(t *testing.T) {
@@ -172,7 +174,6 @@ func TestContext(t *testing.T) {
 
 	log.Float64("float64", 1).Info("info")
 	assert.Equal(t, `{"float64":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
-
 }
 
 func TestFlush(t *testing.T) {
@@ -235,7 +236,6 @@ func TestStdContext(t *testing.T) {
 		logger.Info("test")
 		//t.Log(string(h.Out))
 		assert.Equal(t, `{"level":"INFO","msg":"test"}`+"\n", string(h.Out))
-
 	})
 }
 
@@ -272,7 +272,6 @@ func TestStandardFields(t *testing.T) {
 
 	//t.Log(string(h.Out))
 	assert.Equal(t, `{"hello":"world","strs":["str1","str2"],"is_enabled":true,"int":1,"int8":2,"int16":3,"int32":4,"int64":5,"uint":6,"uint8":7,"uint16":8,"uint32":9,"uint64":10,"float32":11.123,"float64":12.123,"time":"2012-11-01T22:08:41Z","times":["2012-11-01T22:08:41Z","2012-11-01T22:08:41+08:00"],"person":{"Name":"","Age":0},"level":"DEBUG","msg":"debug"}`+"\n", string(h.Out))
-
 }
 
 func TestAdvancedFields(t *testing.T) {
@@ -316,7 +315,7 @@ func TestHook(t *testing.T) {
 	h := memory.New()
 	log.AddHandler(h, log.AllLevels...)
 
-	log.AddHook(func(e *log.Entry) error {
+	_ = log.AddHook(func(e *log.Entry) error {
 		e.Str("app_id", "santa").Str("env", "dev")
 		return nil
 	})
@@ -336,17 +335,21 @@ func TestGoroutineSafe(t *testing.T) {
 	logger := log.Str("request_id", "abc")
 
 	var wg sync.WaitGroup
+
 	wg.Add(2)
+
 	go func() {
 		defer wg.Done()
 		_ = logger.Str("name", "abc")
 		logger.Info("test")
 	}()
+
 	go func() {
 		defer wg.Done()
 		_ = logger.Str("name", "xyz")
 		logger.Info("test")
 	}()
+
 	wg.Wait()
 }
 

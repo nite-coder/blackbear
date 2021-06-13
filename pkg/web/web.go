@@ -167,10 +167,12 @@ func (s *WebServer) SetRender(templateRootPath string) {
 	sharedTemplatePath := path.Join(templateRootPath, "shares/*")
 	tmpl, err := template.ParseGlob(sharedTemplatePath)
 	template := template.Must(tmpl, err)
+
 	if template == nil {
 		_logger.debug("no template")
 		template = template.New("")
 	}
+
 	s.template = template
 	s.templateRootPath = templateRootPath
 }

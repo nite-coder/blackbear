@@ -89,6 +89,7 @@ func (r *router) Invoke(c *Context, next HandlerFunc) {
 	h := r.Find(c.Request.Method, c.Request.URL.Path, c)
 
 	var err error
+
 	if h == nil {
 		if r.webServer.NotFoundHandler != nil {
 			err = r.webServer.NotFoundHandler(c)
@@ -151,15 +152,19 @@ func (r *router) Head(path string, handler HandlerFunc) {
 // Add function which adding path and handler to router
 func (r *router) Add(method string, path string, handler HandlerFunc) {
 	_logger.debug("===Add")
+
 	if len(path) == 0 {
 		panic("router: path couldn't be empty")
 	}
+
 	if path[0] != '/' {
 		panic("router: path was invalid")
 	}
+
 	if len(path) > 1 {
 		path = path[1:]
 	}
+
 	_logger.debug("path:" + path)
 
 	currentNode := r.tree.rootNode
@@ -178,31 +183,34 @@ func (r *router) Add(method string, path string, handler HandlerFunc) {
 		}
 
 		var childNode *node
+		
 		firstSymbol := element[0]
+
 		if firstSymbol == ':' {
 			// this is parameter node
 			pName := element[1:]
 			_logger.debug("parameter_node_pname:" + pName)
 			childNode = currentNode.findChildByKind(pkind)
+
 			if childNode == nil {
 				childNode = newNode(pName, pkind)
 				currentNode.addChild(childNode)
 			}
 
 			isFound := false
+
 			for _, p := range childNode.pNames {
 				if p == pName {
 					isFound = true
 				}
 			}
 
-			if isFound == false {
+			if !isFound {
 				childNode.pNames = append(childNode.pNames, pName)
 				_logger.debug("add_parameter_name:" + pName)
 			}
 
 			pathParams = append(pathParams, pName)
-
 		} else if firstSymbol == '*' {
 			// this is match any node.  We should allow one match any node only.
 			pName := element[1:]
@@ -215,7 +223,6 @@ func (r *router) Add(method string, path string, handler HandlerFunc) {
 			}
 
 			pathParams = append(pathParams, pName)
-
 		} else {
 			// this is static node
 			childNode = currentNode.findChildByName(element)
@@ -233,7 +240,6 @@ func (r *router) Add(method string, path string, handler HandlerFunc) {
 
 		currentNode = childNode
 	}
-
 }
 
 // Find returns http handler for specific path
@@ -241,6 +247,7 @@ func (r *router) Find(method string, path string, c *Context) HandlerFunc {
 	_logger.debug("===Find")
 	_logger.debug("method:" + method)
 	_logger.debug("path:" + path)
+
 	if path[0] == '/' && len(path) > 1 {
 		path = path[1:]
 	}
@@ -254,6 +261,7 @@ func (r *router) Find(method string, path string, c *Context) HandlerFunc {
 	count := len(pathArray)
 
 	pathParams := make(map[int][]Param)
+
 	var paramsNum int
 
 	for index, element := range pathArray {
@@ -266,11 +274,14 @@ func (r *router) Find(method string, path string, c *Context) HandlerFunc {
 
 			if childNode != nil {
 				_logger.debugf("parameter node: %s", element)
+
 				var newParams []Param
+
 				for _, pName := range childNode.pNames {
 					param := Param{Key: pName, Value: element}
 					newParams = append(newParams, param)
 				}
+
 				pathParams[paramsNum] = newParams
 				paramsNum++
 			}
@@ -283,18 +294,23 @@ func (r *router) Find(method string, path string, c *Context) HandlerFunc {
 			if childNode != nil {
 				_logger.debugf("match node: %s", element)
 				start := 0
+
 				for i := 0; i < index; i++ {
 					start += 1 + len(pathArray[i])
 				}
+
 				_logger.debugf("start: %d", start)
 				_logger.debugf("pname count: %d", len(childNode.pNames))
+
 				var newParams []Param
+
 				for _, pName := range childNode.pNames {
 					val := path[start:]
 					_logger.debugf("val: %s", val)
 					param := Param{Key: pName, Value: val}
 					newParams = append(newParams, param)
 				}
+
 				pathParams[paramsNum] = newParams
 				paramsNum++
 
@@ -317,6 +333,7 @@ func (r *router) Find(method string, path string, c *Context) HandlerFunc {
 			paramsNum = 0
 			//println("params_count:", len(pathParams))
 			_logger.debug("lastNode_params_count:", len(childNode.params))
+
 			for _, validParam := range childNode.params {
 				for _, p := range pathParams[paramsNum] {
 					if validParam == p.Key {
@@ -351,12 +368,14 @@ func (n *node) addChild(node *node) {
 
 func (n *node) findChildByName(name string) *node {
 	var result *node
+
 	for _, element := range n.children {
 		if strings.EqualFold(element.name, name) && element.kind == skind {
 			result = element
 			break
 		}
 	}
+
 	return result
 }
 
@@ -366,6 +385,7 @@ func (n *node) findChildByKind(t kind) *node {
 			return c
 		}
 	}
+
 	return nil
 }
 

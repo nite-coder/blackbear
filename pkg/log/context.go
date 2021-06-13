@@ -29,9 +29,11 @@ func newContext(l *logger) Context {
 
 func copyBytes(src []byte) []byte {
 	newBuf := make([]byte, len(src))
+
 	if len(src) > 0 {
 		copy(newBuf, src)
 	}
+
 	return newBuf
 }
 

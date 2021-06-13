@@ -61,14 +61,17 @@ func (c *Context) Render(code int, viewName string, data interface{}) error {
 
 	viewPath := path.Join(c.WebServer.templateRootPath, "views", viewName)
 	t, err = t.ParseFiles(viewPath)
+
 	if err != nil {
 		return err
 	}
 
 	err = t.ExecuteTemplate(c.Writer, viewName, data)
+
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -77,33 +80,41 @@ func (c *Context) String(code int, s string) error {
 	c.Writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	c.Writer.WriteHeader(code)
 	_, err := c.Writer.Write([]byte(s))
+
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
 // JSON returns json format
 func (c *Context) JSON(code int, i interface{}) error {
 	b, err := json.Marshal(i)
+
 	if err != nil {
 		return err
 	}
+
 	c.Writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 	c.Writer.WriteHeader(code)
 	_, err = c.Writer.Write(b)
+
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
 // Redirect returns a HTTP redirect to the specific location.
 func (c *Context) Redirect(code int, location string) error {
 	if (code < 300 || code > 308) && code != 201 {
-		return fmt.Errorf("Cannot redirect with status code %d", code)
+		return fmt.Errorf("cannot redirect with status code %d", code)
 	}
+
 	http.Redirect(c.Writer, c.Request, location, code)
+
 	return nil
 }
 
@@ -113,9 +124,11 @@ func (c *Context) BindJSON(obj interface{}) error {
 	req := c.Request
 	decoder := json.NewDecoder(req.Body)
 	err := decoder.Decode(obj)
+
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -124,6 +137,7 @@ func (c *Context) Query(key string) string {
 	if c.query == nil {
 		c.query = c.Request.URL.Query()
 	}
+
 	return c.query.Get(key)
 }
 
@@ -147,6 +161,7 @@ func (c *Context) Form(key string) string {
 	if s := req.PostFormValue(key); len(s) > 0 {
 		return s
 	}
+
 	if req.MultipartForm != nil {
 		if values := req.MultipartForm.Value[key]; len(values) > 0 {
 			return values[0]
@@ -191,7 +206,9 @@ func (c *Context) SaveUploadedFile(file *multipart.FileHeader, dst string) (err 
 // Get retrieves data from the context.
 func (c *Context) Get(key string) (interface{}, bool) {
 	var value interface{}
+
 	var exists bool
+
 	if c.store != nil {
 		value, exists = c.store[key]
 	}
@@ -203,6 +220,7 @@ func (c *Context) MustGet(key string) interface{} {
 	if value, exists := c.Get(key); exists {
 		return value
 	}
+
 	panic("Key \"" + key + "\" does not exist")
 }
 
@@ -212,6 +230,7 @@ func (c *Context) Set(key string, val interface{}) {
 	if c.store == nil {
 		c.store = make(map[string]interface{})
 	}
+
 	c.store[key] = val
 }
 
@@ -235,24 +254,33 @@ func (c *Context) ParamInt(key string) (int, error) {
 // Use X-Forwarded-For before X-Real-Ip as nginx uses X-Real-Ip with the proxy's IP.
 func (c *Context) ClientIP() string {
 	clientIP := c.RequestHeader("X-Forwarded-For")
+
 	if index := strings.IndexByte(clientIP, ','); index >= 0 {
 		clientIP = clientIP[0:index]
 	}
+
 	clientIP = strings.TrimSpace(clientIP)
+
 	if len(clientIP) > 0 {
 		return clientIP
 	}
+
 	clientIP = strings.TrimSpace(c.RequestHeader("X-Real-Ip"))
+
 	if len(clientIP) > 0 {
 		return clientIP
 	}
+
 	clientIP = strings.TrimSpace(clientIP)
+
 	if len(clientIP) > 0 {
 		return clientIP
 	}
+
 	if ip, _, err := net.SplitHostPort(strings.TrimSpace(c.Request.RemoteAddr)); err == nil {
 		return ip
 	}
+
 	return ""
 }
 
@@ -274,6 +302,7 @@ func (c *Context) SetCookie(
 	if path == "" {
 		path = "/"
 	}
+
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     name,
 		Value:    url.QueryEscape(value),
@@ -288,9 +317,11 @@ func (c *Context) SetCookie(
 // Cookie returns cookie value
 func (c *Context) Cookie(name string) (string, error) {
 	cookie, err := c.Request.Cookie(name)
+
 	if err != nil {
 		return "", err
 	}
+
 	val, _ := url.QueryUnescape(cookie.Value)
 	return val, nil
 }

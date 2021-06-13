@@ -16,7 +16,6 @@ const (
 
 	headerAcceptEncoding  = "Accept-Encoding"
 	headerContentEncoding = "Content-Encoding"
-	headerContentLength   = "Content-Length"
 	headerContentType     = "Content-Type"
 	headerVary            = "Vary"
 	headerSecWebSocketKey = "Sec-WebSocket-Key"
@@ -42,6 +41,7 @@ func (grw gzipResponseWriter) Write(b []byte) (int, error) {
 	if len(grw.Header().Get(headerContentType)) == 0 {
 		grw.Header().Set(headerContentType, http.DetectContentType(b))
 	}
+
 	if len(grw.Header().Get(headerContentEncoding)) > 0 {
 		// compress the content
 		return grw.gz.Write(b)
@@ -60,13 +60,16 @@ type GzipMiddleware struct {
 // Valid values for level are identical to those in the compress/gzip package.
 func NewGzip(level int) *GzipMiddleware {
 	h := &GzipMiddleware{}
+
 	h.pool.New = func() interface{} {
 		gz, err := gzip.NewWriterLevel(ioutil.Discard, level)
 		if err != nil {
 			panic(err)
 		}
+
 		return gz
 	}
+
 	return h
 }
 

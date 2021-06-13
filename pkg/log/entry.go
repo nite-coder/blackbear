@@ -55,6 +55,7 @@ func putEntry(e *Entry) {
 	if cap(e.buf) > maxSize {
 		return
 	}
+
 	entryPool.Put(e)
 }
 
@@ -115,7 +116,6 @@ func (e *Entry) Info(msg string) {
 	e.Message = msg
 
 	handler(e)
-
 }
 
 // Infof level message.
@@ -197,6 +197,7 @@ func (e *Entry) Fatal(msg string) {
 	if AutoStaceTrace {
 		e = e.StackTrace()
 	}
+
 	handler(e)
 	os.Exit(1)
 }
@@ -209,6 +210,7 @@ func (e *Entry) Fatalf(msg string, v ...interface{}) {
 	if AutoStaceTrace {
 		e = e.StackTrace()
 	}
+
 	handler(e)
 	os.Exit(1)
 }
@@ -218,6 +220,7 @@ func (e *Entry) Str(key string, val string) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendString(e.buf, val)
 	return e
@@ -228,6 +231,7 @@ func (e *Entry) Strs(key string, val []string) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendStrings(e.buf, val)
 	return e
@@ -238,8 +242,10 @@ func (e *Entry) Bool(key string, val bool) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendBool(e.buf, val)
+
 	return e
 }
 
@@ -248,8 +254,10 @@ func (e *Entry) Int(key string, val int) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendInt(e.buf, val)
+
 	return e
 }
 
@@ -258,8 +266,10 @@ func (e *Entry) Ints(key string, val []int) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendInts(e.buf, val)
+
 	return e
 }
 
@@ -268,8 +278,10 @@ func (e *Entry) Int8(key string, val int8) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendInt8(e.buf, val)
+
 	return e
 }
 
@@ -278,8 +290,10 @@ func (e *Entry) Int16(key string, val int16) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendInt16(e.buf, val)
+
 	return e
 }
 
@@ -288,8 +302,10 @@ func (e *Entry) Int32(key string, val int32) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendInt32(e.buf, val)
+
 	return e
 }
 
@@ -298,8 +314,10 @@ func (e *Entry) Int64(key string, val int64) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendInt64(e.buf, val)
+
 	return e
 }
 
@@ -308,8 +326,10 @@ func (e *Entry) Uint(key string, val uint) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendUint(e.buf, val)
+
 	return e
 }
 
@@ -318,8 +338,10 @@ func (e *Entry) Uint8(key string, val uint8) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendUint8(e.buf, val)
+
 	return e
 }
 
@@ -328,8 +350,10 @@ func (e *Entry) Uint16(key string, val uint16) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendUint16(e.buf, val)
+
 	return e
 }
 
@@ -338,8 +362,10 @@ func (e *Entry) Uint32(key string, val uint32) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendUint32(e.buf, val)
+
 	return e
 }
 
@@ -348,8 +374,10 @@ func (e *Entry) Uint64(key string, val uint64) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendUint64(e.buf, val)
+
 	return e
 }
 
@@ -358,8 +386,10 @@ func (e *Entry) Float32(key string, val float32) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendFloat32(e.buf, val)
+
 	return e
 }
 
@@ -368,8 +398,10 @@ func (e *Entry) Float64(key string, val float64) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendFloat64(e.buf, val)
+
 	return e
 }
 
@@ -378,8 +410,10 @@ func (e *Entry) Time(key string, val time.Time) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendTime(e.buf, val, time.RFC3339)
+
 	return e
 }
 
@@ -388,8 +422,10 @@ func (e *Entry) Times(key string, val []time.Time) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendTimes(e.buf, val, time.RFC3339)
+
 	return e
 }
 
@@ -398,8 +434,10 @@ func (e *Entry) Dur(key string, d time.Duration) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendDuration(e.buf, d, time.Millisecond, false)
+
 	return e
 }
 
@@ -408,8 +446,10 @@ func (e *Entry) Interface(key string, val interface{}) *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendInterface(e.buf, val)
+
 	return e
 }
 
@@ -418,15 +458,15 @@ func (e *Entry) StackTrace() *Entry {
 	if e == nil {
 		return e
 	}
+
 	e.buf = enc.AppendKey(e.buf, "stack_trace")
 	e.buf = enc.AppendString(e.buf, getStackTrace())
+
 	return e
 }
 
 func handler(e *Entry) {
-
 	for _, h := range e.logger.cacheLeveledHandlers(e.Level) {
-
 		newEntry := copyEntry(e)
 
 		// call hook interface

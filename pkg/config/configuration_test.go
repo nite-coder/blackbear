@@ -47,7 +47,7 @@ func TestConfig(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, noVal, val)
 
-	Set("app.id", "HelloApp")
+	_ = Set("app.id", "HelloApp")
 	val, err = cfg.String("app.id")
 	assert.NoError(t, err)
 	assert.Equal(t, "HelloApp", val)
@@ -60,5 +60,4 @@ func TestConfig(t *testing.T) {
 func TestUnmarshalKey(t *testing.T) {
 	err := LoadContent(yamlContent)
 	require.NoError(t, err)
-
 }

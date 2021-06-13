@@ -49,8 +49,10 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 		// The status will be StatusOK if WriteHeader has not been called yet
 		rw.WriteHeader(http.StatusOK)
 	}
+
 	n, err := rw.ResponseWriter.Write(b)
 	rw.contentLength += n
+	
 	return n, err
 }
 

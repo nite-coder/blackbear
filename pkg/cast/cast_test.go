@@ -542,6 +542,7 @@ func TestToString(t *testing.T) {
 	type Key struct {
 		k string
 	}
+
 	key := &Key{"foo"}
 
 	tests := []struct {

@@ -25,14 +25,17 @@ type Gelf struct {
 // New create a new Gelf instance
 func New(connectionString string) log.Handler {
 	url, err := url.Parse(connectionString)
+
 	if err != nil {
 		panic(fmt.Errorf("graylog connectionString is wrong: %v", err))
 	}
+
 	g := &Gelf{
 		url:      url,
 		isActive: true,
 	}
 	g.manageConnections()
+
 	return g
 }
 
@@ -43,6 +46,7 @@ func (g *Gelf) close() error {
 		_ = g.conn.Close()
 		g.conn = nil
 	}
+
 	return nil
 }
 
@@ -54,8 +58,8 @@ func (g *Gelf) BeforeWriting(e *log.Entry) error {
 		Str("timestamp", time.Now().UTC().Format(time.RFC3339))
 
 	e.Message = ""
+
 	return nil
-	//items["timestamp"] = float64(time.Now().UTC().UnixNano()) / float64(time.Second)
 }
 
 // Write handles the log entry
@@ -69,12 +73,6 @@ func (g *Gelf) Write(bytes []byte) error {
 			_ = g.close()
 			return fmt.Errorf("send log to graylog failed: %w", err)
 		}
-
-		// msg := fmt.Sprintf("payload size: %d", size)
-		// println(msg)
-
-		// msg = fmt.Sprintf("payload body: %s", string(payload))
-		// println(msg)
 	}
 
 	return nil
@@ -95,15 +93,19 @@ func (g *Gelf) manageConnections() {
 	var err error
 	if strings.EqualFold(g.url.Scheme, "tcp") {
 		g.conn, err = net.Dial("tcp", g.url.Host)
+
 		if err != nil {
 			stdlog.Println("gelf tcp connection was failed:", err.Error())
 		}
+
 		g.bufferedWriter = bufio.NewWriter(g.conn)
 	} else {
 		g.conn, err = net.Dial("udp", g.url.Host)
+
 		if err != nil {
 			stdlog.Println("gelf udp connection was failed:", err.Error())
 		}
+
 		g.bufferedWriter = bufio.NewWriter(g.conn)
 	}
 
@@ -111,20 +113,25 @@ func (g *Gelf) manageConnections() {
 	go func() {
 		for {
 			g.mutex.Lock()
-			if g.isActive == false {
+			if !g.isActive {
 				return
 			}
+
 			if g.conn == nil {
 				// TODO: tcp is hard-code at the point, we need to remove that later
 				newConn, err := net.Dial("tcp", g.url.Host)
+
 				if err != nil {
 					stdlog.Printf("gelf: create connection failed: %v", err)
 					continue
 				}
+
 				g.conn = newConn
 				g.bufferedWriter = bufio.NewWriter(g.conn)
+
 				stdlog.Println("gelf: created a connection")
 			}
+
 			_ = g.bufferedWriter.Flush()
 			g.mutex.Unlock()
 			time.Sleep(1 * time.Second)

@@ -58,13 +58,16 @@ func (Encoder) AppendBools(dst []byte, vals []bool) []byte {
 	if len(vals) == 0 {
 		return append(dst, '[', ']')
 	}
+
 	dst = append(dst, '[')
 	dst = strconv.AppendBool(dst, vals[0])
+
 	if len(vals) > 1 {
 		for _, val := range vals[1:] {
 			dst = strconv.AppendBool(append(dst, ','), val)
 		}
 	}
+
 	dst = append(dst, ']')
 	return dst
 }
@@ -81,13 +84,16 @@ func (Encoder) AppendInts(dst []byte, vals []int) []byte {
 	if len(vals) == 0 {
 		return append(dst, '[', ']')
 	}
+
 	dst = append(dst, '[')
 	dst = strconv.AppendInt(dst, int64(vals[0]), 10)
+
 	if len(vals) > 1 {
 		for _, val := range vals[1:] {
 			dst = strconv.AppendInt(append(dst, ','), int64(val), 10)
 		}
 	}
+
 	dst = append(dst, ']')
 	return dst
 }
@@ -104,13 +110,16 @@ func (Encoder) AppendInts8(dst []byte, vals []int8) []byte {
 	if len(vals) == 0 {
 		return append(dst, '[', ']')
 	}
+
 	dst = append(dst, '[')
 	dst = strconv.AppendInt(dst, int64(vals[0]), 10)
+
 	if len(vals) > 1 {
 		for _, val := range vals[1:] {
 			dst = strconv.AppendInt(append(dst, ','), int64(val), 10)
 		}
 	}
+
 	dst = append(dst, ']')
 	return dst
 }
@@ -127,13 +136,16 @@ func (Encoder) AppendInts16(dst []byte, vals []int16) []byte {
 	if len(vals) == 0 {
 		return append(dst, '[', ']')
 	}
+
 	dst = append(dst, '[')
 	dst = strconv.AppendInt(dst, int64(vals[0]), 10)
+
 	if len(vals) > 1 {
 		for _, val := range vals[1:] {
 			dst = strconv.AppendInt(append(dst, ','), int64(val), 10)
 		}
 	}
+
 	dst = append(dst, ']')
 	return dst
 }
@@ -150,13 +162,16 @@ func (Encoder) AppendInts32(dst []byte, vals []int32) []byte {
 	if len(vals) == 0 {
 		return append(dst, '[', ']')
 	}
+
 	dst = append(dst, '[')
 	dst = strconv.AppendInt(dst, int64(vals[0]), 10)
+
 	if len(vals) > 1 {
 		for _, val := range vals[1:] {
 			dst = strconv.AppendInt(append(dst, ','), int64(val), 10)
 		}
 	}
+
 	dst = append(dst, ']')
 	return dst
 }
@@ -173,13 +188,16 @@ func (Encoder) AppendInts64(dst []byte, vals []int64) []byte {
 	if len(vals) == 0 {
 		return append(dst, '[', ']')
 	}
+
 	dst = append(dst, '[')
 	dst = strconv.AppendInt(dst, vals[0], 10)
+
 	if len(vals) > 1 {
 		for _, val := range vals[1:] {
 			dst = strconv.AppendInt(append(dst, ','), val, 10)
 		}
 	}
+
 	dst = append(dst, ']')
 	return dst
 }
@@ -196,13 +214,16 @@ func (Encoder) AppendUints(dst []byte, vals []uint) []byte {
 	if len(vals) == 0 {
 		return append(dst, '[', ']')
 	}
+
 	dst = append(dst, '[')
 	dst = strconv.AppendUint(dst, uint64(vals[0]), 10)
+
 	if len(vals) > 1 {
 		for _, val := range vals[1:] {
 			dst = strconv.AppendUint(append(dst, ','), uint64(val), 10)
 		}
 	}
+
 	dst = append(dst, ']')
 	return dst
 }
@@ -219,13 +240,16 @@ func (Encoder) AppendUints8(dst []byte, vals []uint8) []byte {
 	if len(vals) == 0 {
 		return append(dst, '[', ']')
 	}
+
 	dst = append(dst, '[')
 	dst = strconv.AppendUint(dst, uint64(vals[0]), 10)
+
 	if len(vals) > 1 {
 		for _, val := range vals[1:] {
 			dst = strconv.AppendUint(append(dst, ','), uint64(val), 10)
 		}
 	}
+
 	dst = append(dst, ']')
 	return dst
 }
@@ -242,13 +266,16 @@ func (Encoder) AppendUints16(dst []byte, vals []uint16) []byte {
 	if len(vals) == 0 {
 		return append(dst, '[', ']')
 	}
+
 	dst = append(dst, '[')
 	dst = strconv.AppendUint(dst, uint64(vals[0]), 10)
+
 	if len(vals) > 1 {
 		for _, val := range vals[1:] {
 			dst = strconv.AppendUint(append(dst, ','), uint64(val), 10)
 		}
 	}
+
 	dst = append(dst, ']')
 	return dst
 }
@@ -265,13 +292,16 @@ func (Encoder) AppendUints32(dst []byte, vals []uint32) []byte {
 	if len(vals) == 0 {
 		return append(dst, '[', ']')
 	}
+
 	dst = append(dst, '[')
 	dst = strconv.AppendUint(dst, uint64(vals[0]), 10)
+
 	if len(vals) > 1 {
 		for _, val := range vals[1:] {
 			dst = strconv.AppendUint(append(dst, ','), uint64(val), 10)
 		}
 	}
+
 	dst = append(dst, ']')
 	return dst
 }
@@ -279,7 +309,7 @@ func (Encoder) AppendUints32(dst []byte, vals []uint32) []byte {
 // AppendUint64 converts the input uint64 to a string and
 // appends the encoded string to the input byte slice.
 func (Encoder) AppendUint64(dst []byte, val uint64) []byte {
-	return strconv.AppendUint(dst, uint64(val), 10)
+	return strconv.AppendUint(dst, val, 10)
 }
 
 // AppendUints64 encodes the input uint64s to json and
@@ -288,13 +318,16 @@ func (Encoder) AppendUints64(dst []byte, vals []uint64) []byte {
 	if len(vals) == 0 {
 		return append(dst, '[', ']')
 	}
+
 	dst = append(dst, '[')
 	dst = strconv.AppendUint(dst, vals[0], 10)
+
 	if len(vals) > 1 {
 		for _, val := range vals[1:] {
 			dst = strconv.AppendUint(append(dst, ','), val, 10)
 		}
 	}
+
 	dst = append(dst, ']')
 	return dst
 }
@@ -326,14 +359,18 @@ func (Encoder) AppendFloats32(dst []byte, vals []float32) []byte {
 	if len(vals) == 0 {
 		return append(dst, '[', ']')
 	}
+
 	dst = append(dst, '[')
 	dst = appendFloat(dst, float64(vals[0]), 32)
+
 	if len(vals) > 1 {
 		for _, val := range vals[1:] {
 			dst = appendFloat(append(dst, ','), float64(val), 32)
 		}
 	}
+
 	dst = append(dst, ']')
+
 	return dst
 }
 
@@ -349,13 +386,16 @@ func (Encoder) AppendFloats64(dst []byte, vals []float64) []byte {
 	if len(vals) == 0 {
 		return append(dst, '[', ']')
 	}
+
 	dst = append(dst, '[')
 	dst = appendFloat(dst, vals[0], 32)
+
 	if len(vals) > 1 {
 		for _, val := range vals[1:] {
 			dst = appendFloat(append(dst, ','), val, 64)
 		}
 	}
+
 	dst = append(dst, ']')
 	return dst
 }
@@ -387,6 +427,7 @@ func (Encoder) AppendObjectData(dst []byte, o []byte) []byte {
 	} else if len(dst) > 1 {
 		dst = append(dst, ',')
 	}
+
 	return append(dst, o...)
 }
 
@@ -398,7 +439,6 @@ func (e Encoder) AppendIPAddr(dst []byte, ip net.IP) []byte {
 // AppendIPPrefix adds IPv4 or IPv6 Prefix (address & mask) to dst.
 func (e Encoder) AppendIPPrefix(dst []byte, pfx net.IPNet) []byte {
 	return e.AppendString(dst, pfx.String())
-
 }
 
 // AppendMACAddr adds MAC address to dst.

@@ -18,13 +18,16 @@ func (e Encoder) AppendStrings(dst []byte, vals []string) []byte {
 	if len(vals) == 0 {
 		return append(dst, '[', ']')
 	}
+
 	dst = append(dst, '[')
 	dst = e.AppendString(dst, vals[0])
+
 	if len(vals) > 1 {
 		for _, val := range vals[1:] {
 			dst = e.AppendString(append(dst, ','), val)
 		}
 	}
+
 	dst = append(dst, ']')
 	return dst
 }
@@ -65,10 +68,12 @@ func (Encoder) AppendString(dst []byte, s string) []byte {
 // to be encoded.
 func appendStringComplex(dst []byte, s string, i int) []byte {
 	start := 0
+
 	for i < len(s) {
 		b := s[i]
 		if b >= utf8.RuneSelf {
 			r, size := utf8.DecodeRuneInString(s[i:])
+
 			if r == utf8.RuneError && size == 1 {
 				// In case of error, first append previous simple characters to
 				// the byte slice if any and append a remplacement character code
@@ -76,16 +81,22 @@ func appendStringComplex(dst []byte, s string, i int) []byte {
 				if start < i {
 					dst = append(dst, s[start:i]...)
 				}
+
 				dst = append(dst, `\ufffd`...)
 				i += size
 				start = i
+
 				continue
 			}
+
 			i += size
+
 			continue
 		}
+
 		if noEscapeTable[b] {
 			i++
+
 			continue
 		}
 		// We encountered a character that needs to be encoded.
@@ -95,6 +106,7 @@ func appendStringComplex(dst []byte, s string, i int) []byte {
 		if start < i {
 			dst = append(dst, s[start:i]...)
 		}
+
 		switch b {
 		case '"', '\\':
 			dst = append(dst, '\\', b)
@@ -114,8 +126,10 @@ func appendStringComplex(dst []byte, s string, i int) []byte {
 		i++
 		start = i
 	}
+
 	if start < len(s) {
 		dst = append(dst, s[start:]...)
 	}
+
 	return dst
 }

@@ -21,6 +21,7 @@ type Static struct {
 // NewStatic returns a new instance of Static
 func NewStatic(dir string) *Static {
 	directory := http.Dir(dir)
+
 	return &Static{
 		Dir:       directory,
 		Prefix:    "",
@@ -35,6 +36,7 @@ func (s *Static) Invoke(c *web.Context, next web.HandlerFunc) {
 		_ = next(c)
 		return
 	}
+
 	file := r.URL.Path
 	// if we have a prefix, filter requests by stripping the prefix
 	if s.Prefix != "" {
@@ -42,13 +44,16 @@ func (s *Static) Invoke(c *web.Context, next web.HandlerFunc) {
 			_ = next(c)
 			return
 		}
+
 		file = file[len(s.Prefix):]
 		if file != "" && file[0] != '/' {
 			_ = next(c)
 			return
 		}
 	}
+
 	f, err := s.Dir.Open(file)
+
 	if err != nil {
 		// discard the error?
 		_ = next(c)
@@ -72,6 +77,7 @@ func (s *Static) Invoke(c *web.Context, next web.HandlerFunc) {
 
 		file = path.Join(file, s.IndexFile)
 		f, err = s.Dir.Open(file)
+
 		if err != nil {
 			_ = next(c)
 			return
@@ -79,6 +85,7 @@ func (s *Static) Invoke(c *web.Context, next web.HandlerFunc) {
 		defer f.Close()
 
 		fi, err = f.Stat()
+
 		if err != nil || fi.IsDir() {
 			_ = next(c)
 			return

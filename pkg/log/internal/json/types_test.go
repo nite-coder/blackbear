@@ -54,6 +54,7 @@ func TestAppendType(t *testing.T) {
 		{"AppendFloat64(1e20)", "AppendFloat64", float64(1e20), []byte(`100000000000000000000`)},
 		{"AppendFloat64(1e21)", "AppendFloat64", float64(1e21), []byte(`1000000000000000000000`)},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := w[tt.fn](tt.input); !reflect.DeepEqual(got, tt.want) {
@@ -105,6 +106,7 @@ func Test_appendIP(t *testing.T) {
 		{net.IPv6linklocalallnodes, []byte(`"ff02::1"`)},
 		{net.IP{0x20, 0x01, 0x0d, 0xb8, 0x85, 0xa3, 0x00, 0x00, 0x00, 0x00, 0x8a, 0x2e, 0x03, 0x70, 0x73, 0x34}, []byte(`"2001:db8:85a3::8a2e:370:7334"`)},
 	}
+
 	for _, tt := range IPv6tests {
 		t.Run("IPv6", func(t *testing.T) {
 			if got := enc.AppendIPAddr([]byte{}, tt.input); !reflect.DeepEqual(got, tt.want) {
@@ -139,6 +141,7 @@ func Test_appendIPPrefix(t *testing.T) {
 			Mask: net.CIDRMask(64, 128)},
 			[]byte(`"2001:db8:85a3::8a2e:370:7334/64"`)},
 	}
+	
 	for _, tt := range IPv6Prefixtests {
 		t.Run("IPv6", func(t *testing.T) {
 			if got := enc.AppendIPPrefix([]byte{}, tt.input); !reflect.DeepEqual(got, tt.want) {
