@@ -26,8 +26,8 @@ type responseWriter struct {
 	contentLength int
 }
 
-// NewResponseWriter returns a ResponseWriter which wraps the writer
-func NewResponseWriter() ResponseWriter {
+// newResponseWriter returns a ResponseWriter which wraps the writer
+func newResponseWriter() ResponseWriter {
 	return &responseWriter{
 		status:        defaultStatus,
 		contentLength: noWritten,

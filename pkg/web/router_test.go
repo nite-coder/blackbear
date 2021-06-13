@@ -35,21 +35,23 @@ func TestRouterStaticRoute(t *testing.T) {
 }
 
 func TestRouterParameterRoute(t *testing.T) {
-	var name string
+	var name, age string
 	_, w, s := createTestContext()
 
 	router := newRouter(s)
 	router.Add(GET, "/users/:name", func(c *Context) error {
 		name = c.Param("name")
+		age = c.Query("age")
 		c.SetStatus(200)
 		return nil
 	})
 	s.Use(router)
 
-	req, _ := http.NewRequest("GET", "/users/john", nil)
+	req, _ := http.NewRequest("GET", "/users/john?age=18", nil)
 	s.ServeHTTP(w, req)
 
 	assert.Equal(t, "john", name)
+	assert.Equal(t, "18", age)
 	assert.Equal(t, 200, w.Code)
 }
 

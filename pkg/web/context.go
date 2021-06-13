@@ -40,8 +40,8 @@ type Context struct {
 	store     map[string]interface{}
 }
 
-// NewContext returns a new context instance
-func NewContext(s *WebServer, req *http.Request, writer ResponseWriter) *Context {
+// newContext returns a new context instance
+func newContext(s *WebServer, req *http.Request, writer ResponseWriter) *Context {
 	return &Context{
 		WebServer: s,
 		Request:   req,

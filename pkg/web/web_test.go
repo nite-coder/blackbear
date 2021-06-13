@@ -11,6 +11,12 @@ import (
 func TestDefaultHandlers(t *testing.T) {
 	_, w, s := createTestContext()
 
+	m1 := false
+	s.UseFunc(func(c *Context, next HandlerFunc) {
+		m1 = true
+		next(c)
+	})
+
 	isError := false
 	s.ErrorHandler = func(c *Context, err error) {
 		isError = true
@@ -33,6 +39,7 @@ func TestDefaultHandlers(t *testing.T) {
 	req, _ = http.NewRequest("GET", "/not_found", nil)
 	s.ServeHTTP(w, req)
 
+	assert.Equal(t, true, m1)
 	assert.Equal(t, true, isError)
 	assert.Equal(t, true, isNotFound)
 }

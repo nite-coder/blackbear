@@ -56,12 +56,6 @@ const (
 	TRACE = "TRACE"
 )
 
-var (
-	notFoundHandler = func(c *Context) {
-		_logger.debug("NotFound")
-	}
-)
-
 const (
 	skind kind = iota
 	pkind
@@ -309,7 +303,6 @@ func (r *router) Find(method string, path string, c *Context) HandlerFunc {
 		}
 
 		if childNode == nil {
-			//return notFoundHandler
 			return nil
 		}
 
@@ -317,7 +310,6 @@ func (r *router) Find(method string, path string, c *Context) HandlerFunc {
 		if count == index+1 {
 			myHandler := childNode.findHandler(method)
 			if myHandler == nil {
-				//return notFoundHandler
 				_logger.debug("handler was not found")
 				return nil
 			}
@@ -340,7 +332,6 @@ func (r *router) Find(method string, path string, c *Context) HandlerFunc {
 
 		currentNode = childNode
 	}
-	//return notFoundHandler
 	return nil
 }
 

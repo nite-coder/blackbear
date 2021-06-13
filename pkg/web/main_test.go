@@ -8,10 +8,10 @@ func createTestContext() (*Context, *httptest.ResponseRecorder, *WebServer) {
 	s := NewServer()
 	w := httptest.NewRecorder()
 	c := &Context{
-		Writer: NewResponseWriter(),
+		Writer: newResponseWriter(),
 	}
 	c.WebServer = s
 	c.Writer.reset(w)
-	//c := NewContext(nap, nil, w)
+	//c := newContext(nap, nil, w)
 	return c, w, s
 }

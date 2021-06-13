@@ -79,12 +79,17 @@ func NewServer(mHandlers ...MiddlewareHandler) *WebServer {
 	}
 
 	s.pool.New = func() interface{} {
-		rw := NewResponseWriter()
-		return NewContext(s, nil, rw)
+		rw := newResponseWriter()
+		return newContext(s, nil, rw)
 	}
 
 	s.router = newRouter(s)
 	s.Use(s.router)
+
+	s.NotFoundHandler = func(c *Context) error {
+		c.SetStatus(404)
+		return nil
+	}
 
 	return s
 }

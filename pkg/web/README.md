@@ -9,8 +9,7 @@
 package main
 
 import (
-	"net/http"
-	"github.com/nite-coder/pkg/web"
+	"github.com/nite-coder/blackbear/pkg/web"
 )
 
 func main() {
@@ -20,16 +19,16 @@ func main() {
 		return c.String(200, "Hello World")
 	})
 
-    s.Run(":10080")
+	s.Run(":10080")
 }
 ```
 
-#### Using GET, POST, PUT, PATCH, DELETE and OPTIONS
+### Using GET, POST, PUT, PATCH, DELETE and OPTIONS
 ```go
 package main
 
 import (
-	"github.com/nite-coder/pkg/web"
+	"github.com/nite-coder/blackbear/pkg/web"
 )
 
 func main() {
@@ -47,19 +46,19 @@ func main() {
 }
 ```
 
-#### Parameters in path
+### Parameters in path
 
 ```go
 package main
 
 import (
-	"github.com/jasonsoft/napnap"
+	"github.com/nite-coder/blackbear/pkg/web"
 )
 
 func main() {
-	nap := napnap.New()
+	s := web.NewServer()
 
-	nap.Get("/users/:name", func(c *napnap.Context) error {
+	s.Get("/users/:name", func(c *web.Context) error {
 		name := c.Param("name")
 		return c.String(200, "Hello, "+name)
 	})
@@ -67,36 +66,40 @@ func main() {
 	// /videos/sports/basketball/1.mp4
 	// /videos/2.mp4
 	// both path will route to the endpoint
-	nap.Get("/videos/*video_id", func(c *napnap.Context) error {
+	s.Get("/videos/*video_id", func(c *web.Context) error {
 		id := c.Param("video_id")
 		return c.String(200, "video id is, "+id)
 	})
 
-	http.ListenAndServe("127.0.0.1:10080", nap)
+	s.Run(":10080")
 }
 ```
 
-#### Get querystring value
+### Get querystring value
 ```go
 package main
 
 import (
-	"github.com/jasonsoft/napnap"
+	"github.com/nite-coder/blackbear/pkg/web"
 )
 
 func main() {
-	nap := napnap.New()
+	s := web.NewServer()
 
-	nap.Get("/test?page=1", func(c *napnap.Context) error {
+	// http://localhost:10080/test?page=3
+	s.Get("/test", func(c *web.Context) error {
 		page := c.Query("page") //get query string value
 		return c.String(200, page)
 	})
 
-	http.ListenAndServe("127.0.0.1:10080", nap)
+	err := s.Run(":10080")
+	if err != nil {
+		panic(err)
+	}
 }
 ```
 
-#### Get post form value (Multipart/Urlencoded Form)
+### Get post form value (Multipart/Urlencoded Form)
 ```go
 package main
 
