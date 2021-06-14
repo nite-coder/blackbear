@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/nite-coder/blackbear/pkg/cast"
 	"gopkg.in/yaml.v3"
 )
@@ -25,11 +25,11 @@ type Configuration interface {
 	LoadContent(content string) error
 	FileName() string
 	SetFileName(fileName string)
+	SetEnvPrefix(prefix string)
 	AddPath(path string)
 	String(key string, defaultValue ...string) (string, error)
 	Int32(key string, defaultValue ...int32) (int32, error)
 	UnmarshalKey(key string, val interface{}) error
-	Set(key string, val string) error
 }
 
 type Config struct {
@@ -37,7 +37,7 @@ type Config struct {
 	fileName   string
 	configType string
 	paths      []string
-	mu         sync.RWMutex
+	envPrefix  string
 	cache      map[string]interface{}
 }
 
@@ -46,7 +46,6 @@ func New() Configuration {
 		content:    []byte{},
 		fileName:   "app.yml",
 		configType: "yaml",
-		mu:         sync.RWMutex{},
 		cache:      map[string]interface{}{},
 	}
 
@@ -63,6 +62,11 @@ func (cfg *Config) SetFileName(fileName string) {
 	cfg.fileName = fileName
 }
 
+// SetEnvPrefix set a prefix for env.
+func (cfg *Config) SetEnvPrefix(prefix string) {
+	cfg.envPrefix = prefix
+}
+
 // AddPath adds a path to look for config file.
 func (cfg *Config) AddPath(path string) {
 	cfg.paths = append(cfg.paths, path)
@@ -70,11 +74,9 @@ func (cfg *Config) AddPath(path string) {
 
 // String returns a string type value which has the key.  If the value can't convert to string type,
 func (cfg *Config) String(key string, defaultValue ...string) (string, error) {
-	cfg.mu.RLock()
-	defer cfg.mu.RUnlock()
+	val, err := cfg.find(key)
 
-	val, found := cfg.cache[key]
-	if !found {
+	if err == ErrKeyNotFound {
 		if len(defaultValue) > 0 {
 			return defaultValue[0], nil
 		}
@@ -85,17 +87,28 @@ func (cfg *Config) String(key string, defaultValue ...string) (string, error) {
 	return cast.ToString(val)
 }
 
-func (cfg *Config) UnmarshalKey(key string, val interface{}) error {
+// UnmarshalKey binds a value which has the key.
+func (cfg *Config) UnmarshalKey(key string, value interface{}) error {
+	data, err := cfg.find(key)
+
+	if err != nil {
+		return err
+	}
+
+	err = mapstructure.Decode(data, value)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Int32 returns a int32 type value which has the key.  If the value can't convert to string type,
 func (cfg *Config) Int32(key string, defaultValue ...int32) (int32, error) {
-	cfg.mu.RLock()
-	defer cfg.mu.RUnlock()
+	val, err := cfg.find(key)
 
-	val, found := cfg.cache[key]
-	if !found {
+	if err == ErrKeyNotFound {
 		if len(defaultValue) > 0 {
 			return defaultValue[0], nil
 		}
@@ -104,16 +117,6 @@ func (cfg *Config) Int32(key string, defaultValue ...int32) (int32, error) {
 	}
 
 	return cast.ToInt32(val)
-}
-
-// Set set a new value with key into config.  If the key doesn't exist, a new key will be created and no error be returned.
-func (cfg *Config) Set(key string, val string) error {
-	cfg.mu.Lock()
-	defer cfg.mu.Unlock()
-
-	cfg.cache[key] = val
-
-	return nil
 }
 
 // Load initialize this package. It will load config into cache and get ready to work.  However,
@@ -154,7 +157,9 @@ func (cfg *Config) Load() error {
 		cfg.content, err = ioutil.ReadFile(filepath.Clean(configFilePath))
 
 		if err != nil {
+
 			if errors.Is(err, os.ErrNotExist) {
+
 				if (idx + 1) == len(cfg.paths) {
 					return ErrFileNotFound
 				}
@@ -178,11 +183,9 @@ func (cfg *Config) LoadContent(content string) error {
 }
 
 func (cfg *Config) start() error {
-	items := map[string]interface{}{}
-
 	switch cfg.configType {
 	case "yaml", "yml":
-		err := yaml.Unmarshal(cfg.content, &items)
+		err := yaml.Unmarshal(cfg.content, &cfg.cache)
 		if err != nil {
 			return err
 		}
@@ -191,43 +194,94 @@ func (cfg *Config) start() error {
 		return ErrConfigTypeNotSupport
 	}
 
-	cfg.mu.Lock()
-	defer cfg.mu.Unlock()
-
-	for k, v := range items {
-		cfg.buildCache(k, v)
-	}
-
 	return nil
 }
 
-func (cfg *Config) buildCache(key string, val interface{}) {
-	if val == nil {
-		return
+func getValueFromEnv(prefix, key string) (string, error) {
+	key = strings.ReplaceAll(key, ".", "_")
+
+	if len(prefix) > 0 {
+		key = prefix + "_" + key
 	}
 
-	myArray, ok := val.([]interface{})
-	if ok {
-		for keyA, valA := range myArray {
-			newKey := fmt.Sprintf("%s[%d]", key, keyA)
-			cfg.buildCache(newKey, valA)
+	key = strings.ToUpper(key)
+	val, present := os.LookupEnv(key)
+	if present {
+		return val, nil
+	}
+	return "", ErrKeyNotFound
+}
+
+func (cfg *Config) find(key string) (interface{}, error) {
+	if len(key) == 0 {
+		return cfg.cache, nil
+	}
+
+	val, err := getValueFromEnv(cfg.envPrefix, key)
+	if err == nil {
+		return val, nil
+	}
+
+	var lastOne, found bool
+	keys := strings.Split(key, ".")
+	var temp interface{}
+
+	temp = cfg.cache
+
+	for idx, key := range keys {
+		if idx == len(keys)-1 {
+			lastOne = true
 		}
 
-		return
-	}
-
-	myMap, ok := val.(map[string]interface{})
-	if ok {
-		for keyA, valA := range myMap {
-			newKey := fmt.Sprintf("%s.%s", key, keyA)
-			cfg.buildCache(newKey, valA)
+		if temp == nil {
+			return nil, ErrKeyNotFound
 		}
 
-		return
+		myMap, ok := temp.(map[string]interface{})
+
+		if ok {
+			temp, found = myMap[key]
+
+			if !found {
+				return nil, ErrKeyNotFound
+			}
+
+			if lastOne {
+				return temp, nil
+			}
+
+			continue
+
+		}
+
+		myArray, ok := temp.([]interface{})
+
+		if ok {
+			arIdx, err := cast.ToInt(key)
+
+			if err != nil {
+				return nil, ErrKeyNotFound
+			}
+
+			if arIdx >= len(myArray) {
+				return nil, ErrKeyNotFound
+			}
+
+			temp = myArray[arIdx]
+
+			if lastOne {
+				return temp, nil
+			}
+
+			continue
+		}
+
+		myVal, ok := temp.(interface{})
+
+		if ok && myVal != nil {
+			return temp, nil
+		}
 	}
 
-	myVal, ok := val.(interface{})
-	if ok && myVal != nil {
-		cfg.cache[key] = myVal
-	}
+	return nil, ErrKeyNotFound
 }

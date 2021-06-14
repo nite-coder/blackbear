@@ -26,17 +26,22 @@ func SetFileName(fileName string) {
 	cfg.SetFileName(fileName)
 }
 
+// SetEnvPrefix set a prefix for env.
+func SetEnvPrefix(prefix string) {
+	cfg.SetEnvPrefix(prefix)
+}
+
 // String returns a string type value which has the key.  If the value can't convert to string type,
 func String(key string, defaultValue ...string) (string, error) {
 	return cfg.String(key, defaultValue...)
 }
 
-// Set set a new value with key into config.  If the key doesn't exist, a new key will be created and no error be returned.
-func Set(key string, val string) error {
-	return cfg.Set(key, val)
-}
-
 // Int32 returns a int32 type value which has the key.  If the value can't convert to string type,
 func Int32(key string, defaultValue ...int32) (int32, error) {
 	return cfg.Int32(key, defaultValue...)
+}
+
+// UnmarshalKey binds a value which has the key.
+func UnmarshalKey(key string, value interface{}) error {
+	return cfg.UnmarshalKey(key, value)
 }

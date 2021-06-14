@@ -5,7 +5,7 @@
 
 ## 讀取屬性的優先順序
 有效順序依照下面排序，數字越小有效等級越高，如果檔案已經被找到將不會繼續往下找尋
-1. OS environment variables. 
+1. OS environment variables. (all upper case)
 1. A `/config` subdir of the working directory.
 1. The working directory
 1. 當前執行檔所位址下面的 `config` 目錄
@@ -48,19 +48,10 @@ web:
     fmt.Print(port) // print: 10080
 ```
 
-2. 更新配置內容
-```Go
-    cfg := config.Start()
-    cfg.Set("app_id", "helloAPP")
-
-    appID := cfg.Get("app_id")
-
-    fmt.Print(appID) // helloAPP
-```
-
 ## 更新檢查
 目前是採用緩存機制，如果已經有內容被讀入就會被緩存已提升後續的效能
 
 ## RoadMap
 1. 配置檔的繼承模式
-2. Apollo 等工具整合
+1. Apollo 等工具整合
+1. File Watch
