@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -14,7 +15,7 @@ import (
 )
 
 var (
-	cfg                     = New()
+	cfg                     = new()
 	ErrFileNotFound         = errors.New("config file was not found")
 	ErrKeyNotFound          = errors.New("key was not found")
 	ErrConfigTypeNotSupport = errors.New("config type is not support")
@@ -23,8 +24,8 @@ var (
 type Configuration interface {
 	Load() error
 	LoadContent(content string) error
-	FileName() string
-	SetFileName(fileName string)
+	ConfigName() string
+	SetConfigName(configName string)
 	SetEnvPrefix(prefix string)
 	AddPath(path string)
 	String(key string, defaultValue ...string) (string, error)
@@ -34,17 +35,17 @@ type Configuration interface {
 
 type Config struct {
 	content    []byte
-	fileName   string
+	configName string
 	configType string
 	paths      []string
 	envPrefix  string
 	cache      map[string]interface{}
 }
 
-func New() Configuration {
+func new() Configuration {
 	cfg := Config{
 		content:    []byte{},
-		fileName:   "app.yml",
+		configName: "app.yml",
 		configType: "yaml",
 		cache:      map[string]interface{}{},
 	}
@@ -52,22 +53,28 @@ func New() Configuration {
 	return &cfg
 }
 
-// FileName return config file name.  The default config file name is "app.yml"
-func (cfg *Config) FileName() string {
-	return cfg.fileName
+// ConfigName return config file name.  The default config file name is "app.yml"
+func (cfg *Config) ConfigName() string {
+	return cfg.configName
 }
 
-// SetFileName set a config file name.  The default config file name is "app.yml"
-func (cfg *Config) SetFileName(fileName string) {
-	cfg.fileName = fileName
+// SetConfigName set a config file name.  The default config file name is "app.yml"
+func (cfg *Config) SetConfigName(configName string) {
+	if len(configName) == 0 {
+		return
+	}
+	cfg.configName = configName
 }
 
 // SetEnvPrefix set a prefix for env.
 func (cfg *Config) SetEnvPrefix(prefix string) {
-	cfg.envPrefix = prefix
+	if len(prefix) == 0 {
+		return
+	}
+	cfg.envPrefix = strings.ToUpper(prefix)
 }
 
-// AddPath adds a path to look for config file.
+// AddPath adds a path to look for config file.  Please don't include filename. Directory only
 func (cfg *Config) AddPath(path string) {
 	cfg.paths = append(cfg.paths, path)
 }
@@ -153,7 +160,7 @@ func (cfg *Config) Load() error {
 			continue
 		}
 
-		configFilePath := filepath.Join(path, cfg.fileName)
+		configFilePath := filepath.Join(path, cfg.configName)
 		cfg.content, err = ioutil.ReadFile(filepath.Clean(configFilePath))
 
 		if err != nil {
@@ -190,6 +197,10 @@ func (cfg *Config) start() error {
 			return err
 		}
 	case "json":
+		err := json.Unmarshal(cfg.content, &cfg.cache)
+		if err != nil {
+			return err
+		}
 	default:
 		return ErrConfigTypeNotSupport
 	}

@@ -16,14 +16,14 @@ func LoadContent(content string) error {
 	return cfg.LoadContent(content)
 }
 
-// FileName return config file name.  The default config file name is "app.yml"
-func FileName() string {
-	return cfg.FileName()
+// ConfigName return config file name.  The default config file name is "app.yml"
+func ConfigName() string {
+	return cfg.ConfigName()
 }
 
-// SetFileName set a config file name to default configuration instance.  The default config file name is "app.yml"
-func SetFileName(fileName string) {
-	cfg.SetFileName(fileName)
+// SetConfigName set a config file name to default configuration instance.  The default config file name is "app.yml"
+func SetConfigName(configName string) {
+	cfg.SetConfigName(configName)
 }
 
 // SetEnvPrefix set a prefix for env.

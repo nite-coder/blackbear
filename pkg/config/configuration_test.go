@@ -83,22 +83,23 @@ func TestEnv(t *testing.T) {
 		panic(err)
 	}
 
-	// new test
-	err = os.Setenv("HELLO_WEB_MODE", "debug")
-	if err != nil {
-		panic(err)
-	}
+	t.Run("prefix test", func(t *testing.T) {
+		err = os.Setenv("HELLO_WEB_MODE", "debug")
+		if err != nil {
+			panic(err)
+		}
 
-	SetEnvPrefix("HELLO")
-	val, err = String("web.MODE")
-	require.NoError(t, err)
-	assert.Equal(t, "debug", val)
+		SetEnvPrefix("HELLO")
 
-	err = os.Unsetenv("HELLO_WEB_MODE")
-	if err != nil {
-		panic(err)
-	}
+		val, err = String("web.MODE")
+		require.NoError(t, err)
+		assert.Equal(t, "debug", val)
 
+		err = os.Unsetenv("HELLO_WEB_MODE")
+		if err != nil {
+			panic(err)
+		}
+	})
 }
 
 type LogItem struct {
