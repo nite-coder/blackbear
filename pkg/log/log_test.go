@@ -25,13 +25,12 @@ func TestNoHandler(t *testing.T) {
 }
 
 func TestAddHandlers(t *testing.T) {
-	h1 := memory.New()
-
 	log.RemoveAllHandlers()
+
+	h1 := memory.New()
 	log.AddHandler(h1, log.AllLevels...)
 
 	h2 := memory.New()
-
 	log.AddHandler(h2, log.AllLevels...)
 
 	log.Info("info")

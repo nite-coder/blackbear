@@ -1,9 +1,12 @@
-package config
+package config_test
 
 import (
 	"os"
 	"testing"
 
+	"github.com/nite-coder/blackbear/pkg/config"
+	"github.com/nite-coder/blackbear/pkg/config/providers/env"
+	"github.com/nite-coder/blackbear/pkg/config/providers/file"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -13,6 +16,8 @@ var (
 env: "test"
 app:
   id: blackbear
+
+money: 123.42
 
 logs:
   - name: clog
@@ -33,75 +38,6 @@ web:
 `
 )
 
-func TestConfig(t *testing.T) {
-	err := LoadContent(yamlContent)
-	require.NoError(t, err)
-
-	val, err := String("env")
-	assert.NoError(t, err)
-	assert.Equal(t, "test", val)
-
-	val, err = String("app.id")
-	assert.NoError(t, err)
-	assert.Equal(t, "blackbear", val)
-
-	_, err = String("hello")
-	assert.ErrorIs(t, ErrKeyNotFound, err)
-
-	defaultValue := "default value"
-	val, err = String("logs.Hello", defaultValue)
-	assert.NoError(t, err)
-	assert.Equal(t, defaultValue, val)
-
-	int32Result, err := Int32("web.port")
-	assert.NoError(t, err)
-	assert.Equal(t, int32(10080), int32Result)
-
-	val, err = String("datasource.2")
-	assert.NoError(t, err)
-	assert.Equal(t, "name3", val)
-
-	_, err = String("datasource.4")
-	assert.ErrorIs(t, ErrKeyNotFound, err)
-}
-
-func TestEnv(t *testing.T) {
-	err := os.Setenv("ENV", "from_env")
-	if err != nil {
-		panic(err)
-	}
-
-	err = LoadContent(yamlContent)
-	require.NoError(t, err)
-
-	val, err := String("env")
-	require.NoError(t, err)
-	assert.Equal(t, "from_env", val)
-
-	err = os.Unsetenv("ENV")
-	if err != nil {
-		panic(err)
-	}
-
-	t.Run("prefix test", func(t *testing.T) {
-		err = os.Setenv("HELLO_WEB_MODE", "debug")
-		if err != nil {
-			panic(err)
-		}
-
-		SetEnvPrefix("HELLO")
-
-		val, err = String("web.MODE")
-		require.NoError(t, err)
-		assert.Equal(t, "debug", val)
-
-		err = os.Unsetenv("HELLO_WEB_MODE")
-		if err != nil {
-			panic(err)
-		}
-	})
-}
-
 type LogItem struct {
 	Name     string
 	Type     string
@@ -118,35 +54,115 @@ type Root struct {
 	Web Web
 }
 
-func TestUnmarshalKey(t *testing.T) {
-	err := LoadContent(yamlContent)
+func TestNoProvider(t *testing.T) {
+	config.RemoveAllPrividers()
+
+	_, err := config.String("hello")
+	require.ErrorIs(t, config.ErrProviderNotFound, err)
+}
+
+func TestAddProviders(t *testing.T) {
+	config.RemoveAllPrividers()
+
+	envProvider := env.New()
+	config.AddProvider(envProvider)
+
+	fileProvder := file.New()
+	fileProvder.LoadContent(yamlContent)
+	config.AddProvider(fileProvder)
+
+	err := os.Setenv("ENV", "first")
+	if err != nil {
+		panic(err)
+	}
+
+	env, _ := config.String("env")
+	assert.Equal(t, "first", env)
+
+	appID, _ := config.String("app.id")
+	assert.Equal(t, "blackbear", appID)
+
+	err = os.Unsetenv("ENV")
+	if err != nil {
+		panic(err)
+	}
+}
+
+func TestConverterType(t *testing.T) {
+	config.RemoveAllPrividers()
+
+	fileProvder := file.New()
+	err := fileProvder.LoadContent(yamlContent)
 	require.NoError(t, err)
+	config.AddProvider(fileProvder)
+
+	val, err := config.String("app.id")
+	require.NoError(t, err)
+	assert.Equal(t, "blackbear", val)
+
+	intVal, err := config.Int("web.port")
+	assert.NoError(t, err)
+	assert.Equal(t, 10080, intVal)
+
+	int32Result, err := config.Int32("web.port")
+	assert.NoError(t, err)
+	assert.Equal(t, int32(10080), int32Result)
+
+	int64Val, err := config.Int64("web.port")
+	assert.NoError(t, err)
+	assert.Equal(t, int64(10080), int64Val)
+
+	boolVal, err := config.Bool("web.ping")
+	assert.NoError(t, err)
+	assert.Equal(t, true, boolVal)
+
+	float32Val, err := config.Float32("money")
+	assert.NoError(t, err)
+	assert.Equal(t, float32(123.42), float32Val)
+
+	float64Val, err := config.Float64("money")
+	assert.NoError(t, err)
+	assert.Equal(t, 123.42, float64Val)
+
+	defaultValue := "default value"
+	val, err = config.String("logs.Hello", defaultValue)
+	assert.NoError(t, err)
+	assert.Equal(t, defaultValue, val)
+}
+
+func TestScan(t *testing.T) {
+	config.RemoveAllPrividers()
+
+	fileProvder := file.New()
+	err := fileProvder.LoadContent(yamlContent)
+	require.NoError(t, err)
+	config.AddProvider(fileProvder)
 
 	logSetting := []LogItem{}
 
-	err = UnmarshalKey("logs", &logSetting)
+	err = config.Scan("logs", &logSetting)
 	require.NoError(t, err)
 	assert.Equal(t, "clog", logSetting[0].Name)
 
 	data := []string{}
-	err = UnmarshalKey("datasource", &data)
+	err = config.Scan("datasource", &data)
 	require.NoError(t, err)
 	assert.Equal(t, 3, len(data))
 	assert.Equal(t, "name2", data[1])
 
 	env := ""
-	err = UnmarshalKey("env", &env)
+	err = config.Scan("env", &env)
 	require.NoError(t, err)
 	assert.Equal(t, "test", env)
 
 	web := Web{}
-	err = UnmarshalKey("web", &web)
+	err = config.Scan("web", &web)
 	require.NoError(t, err)
 	assert.Equal(t, 10080, web.Port)
 	assert.Equal(t, true, web.Ping)
 
 	root := Root{}
-	err = UnmarshalKey("", &root)
+	err = config.Scan("", &root)
 	require.NoError(t, err)
 	assert.Equal(t, 10080, root.Web.Port)
 	assert.Equal(t, true, root.Web.Ping)

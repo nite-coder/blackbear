@@ -64,6 +64,29 @@ func String(key string, defaultValue ...string) (string, error) {
 	return "", ErrKeyNotFound
 }
 
+// Int returns a int type value which has the key.
+func Int(key string, defaultValue ...int) (int, error) {
+	if len(cfg.providers) == 0 {
+		return 0, ErrProviderNotFound
+	}
+
+	for _, p := range cfg.providers {
+		val, err := p.Get(key)
+
+		if err != nil {
+			continue
+		}
+
+		return cast.ToInt(val)
+	}
+
+	if len(defaultValue) > 0 {
+		return defaultValue[0], nil
+	}
+
+	return 0, ErrKeyNotFound
+}
+
 // Int32 returns a int32 type value which has the key.
 func Int32(key string, defaultValue ...int32) (int32, error) {
 	if len(cfg.providers) == 0 {
@@ -87,8 +110,100 @@ func Int32(key string, defaultValue ...int32) (int32, error) {
 	return 0, ErrKeyNotFound
 }
 
-// UnmarshalKey binds a value which has the key.
-func UnmarshalKey(key string, value interface{}) error {
+// Int64 returns a int64 type value which has the key.
+func Int64(key string, defaultValue ...int64) (int64, error) {
+	if len(cfg.providers) == 0 {
+		return 0, ErrProviderNotFound
+	}
+
+	for _, p := range cfg.providers {
+		val, err := p.Get(key)
+
+		if err != nil {
+			continue
+		}
+
+		return cast.ToInt64(val)
+	}
+
+	if len(defaultValue) > 0 {
+		return defaultValue[0], nil
+	}
+
+	return 0, ErrKeyNotFound
+}
+
+// Float32 returns a float32 type value which has the key.
+func Float32(key string, defaultValue ...float32) (float32, error) {
+	if len(cfg.providers) == 0 {
+		return 0, ErrProviderNotFound
+	}
+
+	for _, p := range cfg.providers {
+		val, err := p.Get(key)
+
+		if err != nil {
+			continue
+		}
+
+		return cast.ToFloat32(val)
+	}
+
+	if len(defaultValue) > 0 {
+		return defaultValue[0], nil
+	}
+
+	return 0, ErrKeyNotFound
+}
+
+// Float64 returns a float64 type value which has the key.
+func Float64(key string, defaultValue ...float64) (float64, error) {
+	if len(cfg.providers) == 0 {
+		return 0, ErrProviderNotFound
+	}
+
+	for _, p := range cfg.providers {
+		val, err := p.Get(key)
+
+		if err != nil {
+			continue
+		}
+
+		return cast.ToFloat64(val)
+	}
+
+	if len(defaultValue) > 0 {
+		return defaultValue[0], nil
+	}
+
+	return 0, ErrKeyNotFound
+}
+
+// Bool returns a boolean type value which has the key.
+func Bool(key string, defaultValue ...bool) (bool, error) {
+	if len(cfg.providers) == 0 {
+		return false, ErrProviderNotFound
+	}
+
+	for _, p := range cfg.providers {
+		val, err := p.Get(key)
+
+		if err != nil {
+			continue
+		}
+
+		return cast.ToBool(val)
+	}
+
+	if len(defaultValue) > 0 {
+		return defaultValue[0], nil
+	}
+
+	return false, ErrKeyNotFound
+}
+
+// Scan binds a value which has the key.
+func Scan(key string, value interface{}) error {
 	if len(cfg.providers) == 0 {
 		return ErrProviderNotFound
 	}
