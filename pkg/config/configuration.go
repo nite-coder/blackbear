@@ -1,298 +1,111 @@
 package config
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strings"
+	"sync"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/nite-coder/blackbear/pkg/cast"
-	"gopkg.in/yaml.v3"
 )
 
 var (
 	cfg                     = new()
-	ErrFileNotFound         = errors.New("config file was not found")
-	ErrKeyNotFound          = errors.New("key was not found")
-	ErrConfigTypeNotSupport = errors.New("config type is not support")
+	ErrFileNotFound         = errors.New("config: config file was not found")
+	ErrKeyNotFound          = errors.New("config: key was not found")
+	ErrProviderNotFound     = errors.New("config: no provider is added to config.  Provider need to be added first")
+	ErrConfigTypeNotSupport = errors.New("config: type is not support")
 )
 
-type Configuration interface {
-	Load() error
-	LoadContent(content string) error
-	ConfigName() string
-	SetConfigName(configName string)
-	SetEnvPrefix(prefix string)
-	AddPath(path string)
-	String(key string, defaultValue ...string) (string, error)
-	Int32(key string, defaultValue ...int32) (int32, error)
-	UnmarshalKey(key string, val interface{}) error
+type Configuration struct {
+	providers []Provider
+	rwMutex   sync.RWMutex
 }
 
-type Config struct {
-	content    []byte
-	configName string
-	configType string
-	paths      []string
-	envPrefix  string
-	cache      map[string]interface{}
+func new() *Configuration {
+	return &Configuration{
+		providers: []Provider{},
+	}
 }
 
-func new() Configuration {
-	cfg := Config{
-		content:    []byte{},
-		configName: "app.yml",
-		configType: "yaml",
-		cache:      map[string]interface{}{},
+func AddProvider(provider Provider) {
+	cfg.rwMutex.Lock()
+	defer cfg.rwMutex.Unlock()
+
+	cfg.providers = append(cfg.providers, provider)
+}
+
+func RemoveAllPrividers() {
+	cfg.rwMutex.Lock()
+	defer cfg.rwMutex.Unlock()
+
+	cfg.providers = []Provider{}
+}
+
+// String returns a string type value which has the key.
+func String(key string, defaultValue ...string) (string, error) {
+	if len(cfg.providers) == 0 {
+		return "", ErrProviderNotFound
 	}
 
-	return &cfg
-}
+	for _, p := range cfg.providers {
+		val, err := p.Get(key)
 
-// ConfigName return config file name.  The default config file name is "app.yml"
-func (cfg *Config) ConfigName() string {
-	return cfg.configName
-}
-
-// SetConfigName set a config file name.  The default config file name is "app.yml"
-func (cfg *Config) SetConfigName(configName string) {
-	if len(configName) == 0 {
-		return
-	}
-	cfg.configName = configName
-}
-
-// SetEnvPrefix set a prefix for env.
-func (cfg *Config) SetEnvPrefix(prefix string) {
-	if len(prefix) == 0 {
-		return
-	}
-	cfg.envPrefix = strings.ToUpper(prefix)
-}
-
-// AddPath adds a path to look for config file.  Please don't include filename. Directory only
-func (cfg *Config) AddPath(path string) {
-	cfg.paths = append(cfg.paths, path)
-}
-
-// String returns a string type value which has the key.  If the value can't convert to string type,
-func (cfg *Config) String(key string, defaultValue ...string) (string, error) {
-	val, err := cfg.find(key)
-
-	if err == ErrKeyNotFound {
-		if len(defaultValue) > 0 {
-			return defaultValue[0], nil
-		}
-
-		return "", ErrKeyNotFound
-	}
-
-	return cast.ToString(val)
-}
-
-// UnmarshalKey binds a value which has the key.
-func (cfg *Config) UnmarshalKey(key string, value interface{}) error {
-	data, err := cfg.find(key)
-
-	if err != nil {
-		return err
-	}
-
-	err = mapstructure.Decode(data, value)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// Int32 returns a int32 type value which has the key.  If the value can't convert to string type,
-func (cfg *Config) Int32(key string, defaultValue ...int32) (int32, error) {
-	val, err := cfg.find(key)
-
-	if err == ErrKeyNotFound {
-		if len(defaultValue) > 0 {
-			return defaultValue[0], nil
-		}
-
-		return 0, ErrKeyNotFound
-	}
-
-	return cast.ToInt32(val)
-}
-
-// Load initialize this package. It will load config into cache and get ready to work.  However,
-// if the config file was not found, `ErrFileNotFound` will be returned
-func (cfg *Config) Load() error {
-	var err error
-
-	if len(cfg.paths) == 0 {
-		path, err := os.Getwd()
 		if err != nil {
-			panic(err)
-		}
-
-		cfg.AddPath(filepath.Join(path, "config"))
-		cfg.AddPath(path)
-
-		// load config file from executed file's sub config folder
-		path, err = os.Executable()
-		if err != nil {
-			panic(err)
-		}
-
-		cfg.AddPath(filepath.Join(path, "config"))
-		cfg.AddPath(filepath.Dir(path))
-	}
-
-	for idx, path := range cfg.paths {
-		// found config file
-		if len(cfg.content) > 0 {
-			break
-		}
-
-		if len(path) == 0 {
 			continue
 		}
 
-		configFilePath := filepath.Join(path, cfg.configName)
-		cfg.content, err = ioutil.ReadFile(filepath.Clean(configFilePath))
-
-		if err != nil {
-
-			if errors.Is(err, os.ErrNotExist) {
-
-				if (idx + 1) == len(cfg.paths) {
-					return ErrFileNotFound
-				}
-
-				continue
-			}
-
-			return fmt.Errorf("config: read file error: %w", err)
-		}
+		return cast.ToString(val)
 	}
 
-	return cfg.start()
-}
-
-// LoadContent reads the content as config file
-func (cfg *Config) LoadContent(content string) error {
-	content = strings.TrimSpace(content)
-	cfg.content = []byte(content)
-
-	return cfg.start()
-}
-
-func (cfg *Config) start() error {
-	switch cfg.configType {
-	case "yaml", "yml":
-		err := yaml.Unmarshal(cfg.content, &cfg.cache)
-		if err != nil {
-			return err
-		}
-	case "json":
-		err := json.Unmarshal(cfg.content, &cfg.cache)
-		if err != nil {
-			return err
-		}
-	default:
-		return ErrConfigTypeNotSupport
+	if len(defaultValue) > 0 {
+		return defaultValue[0], nil
 	}
 
-	return nil
-}
-
-func getValueFromEnv(prefix, key string) (string, error) {
-	key = strings.ReplaceAll(key, ".", "_")
-
-	if len(prefix) > 0 {
-		key = prefix + "_" + key
-	}
-
-	key = strings.ToUpper(key)
-	val, present := os.LookupEnv(key)
-	if present {
-		return val, nil
-	}
 	return "", ErrKeyNotFound
 }
 
-func (cfg *Config) find(key string) (interface{}, error) {
-	if len(key) == 0 {
-		return cfg.cache, nil
+// Int32 returns a int32 type value which has the key.
+func Int32(key string, defaultValue ...int32) (int32, error) {
+	if len(cfg.providers) == 0 {
+		return 0, ErrProviderNotFound
 	}
 
-	val, err := getValueFromEnv(cfg.envPrefix, key)
-	if err == nil {
-		return val, nil
-	}
+	for _, p := range cfg.providers {
+		val, err := p.Get(key)
 
-	var lastOne, found bool
-	keys := strings.Split(key, ".")
-	var temp interface{}
-
-	temp = cfg.cache
-
-	for idx, key := range keys {
-		if idx == len(keys)-1 {
-			lastOne = true
-		}
-
-		if temp == nil {
-			return nil, ErrKeyNotFound
-		}
-
-		myMap, ok := temp.(map[string]interface{})
-
-		if ok {
-			temp, found = myMap[key]
-
-			if !found {
-				return nil, ErrKeyNotFound
-			}
-
-			if lastOne {
-				return temp, nil
-			}
-
-			continue
-
-		}
-
-		myArray, ok := temp.([]interface{})
-
-		if ok {
-			arIdx, err := cast.ToInt(key)
-
-			if err != nil {
-				return nil, ErrKeyNotFound
-			}
-
-			if arIdx >= len(myArray) {
-				return nil, ErrKeyNotFound
-			}
-
-			temp = myArray[arIdx]
-
-			if lastOne {
-				return temp, nil
-			}
-
+		if err != nil {
 			continue
 		}
 
-		myVal, ok := temp.(interface{})
-
-		if ok && myVal != nil {
-			return temp, nil
-		}
+		return cast.ToInt32(val)
 	}
 
-	return nil, ErrKeyNotFound
+	if len(defaultValue) > 0 {
+		return defaultValue[0], nil
+	}
+
+	return 0, ErrKeyNotFound
+}
+
+// UnmarshalKey binds a value which has the key.
+func UnmarshalKey(key string, value interface{}) error {
+	if len(cfg.providers) == 0 {
+		return ErrProviderNotFound
+	}
+
+	for _, p := range cfg.providers {
+		val, err := p.Get(key)
+
+		if err != nil {
+			continue
+		}
+
+		err = mapstructure.Decode(val, value)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	return ErrKeyNotFound
 }

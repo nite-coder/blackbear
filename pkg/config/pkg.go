@@ -1,5 +1,14 @@
 package config
 
+import (
+	"github.com/mitchellh/mapstructure"
+	"github.com/nite-coder/blackbear/pkg/cast"
+)
+
+var (
+	cfg = new()
+)
+
 // Cfg return a singleton configuration instance.
 func Cfg() Configuration {
 	return cfg
@@ -31,17 +40,49 @@ func SetEnvPrefix(prefix string) {
 	cfg.SetEnvPrefix(prefix)
 }
 
-// String returns a string type value which has the key.  If the value can't convert to string type,
+// String returns a string type value which has the key.
 func String(key string, defaultValue ...string) (string, error) {
-	return cfg.String(key, defaultValue...)
+	val, err := cfg.Get(key)
+
+	if err == ErrKeyNotFound {
+		if len(defaultValue) > 0 {
+			return defaultValue[0], nil
+		}
+
+		return "", ErrKeyNotFound
+	}
+
+	return cast.ToString(val)
 }
 
-// Int32 returns a int32 type value which has the key.  If the value can't convert to string type,
+// Int32 returns a int32 type value which has the key.
 func Int32(key string, defaultValue ...int32) (int32, error) {
-	return cfg.Int32(key, defaultValue...)
+	val, err := cfg.Get(key)
+
+	if err == ErrKeyNotFound {
+		if len(defaultValue) > 0 {
+			return defaultValue[0], nil
+		}
+
+		return 0, ErrKeyNotFound
+	}
+
+	return cast.ToInt32(val)
 }
 
 // UnmarshalKey binds a value which has the key.
 func UnmarshalKey(key string, value interface{}) error {
-	return cfg.UnmarshalKey(key, value)
+	data, err := cfg.Get(key)
+
+	if err != nil {
+		return err
+	}
+
+	err = mapstructure.Decode(data, value)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
