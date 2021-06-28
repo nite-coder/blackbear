@@ -14,10 +14,17 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type ConfigType string
+
+const (
+	ConfigTypeYAML ConfigType = "yaml"
+	ConfigTypeJSON ConfigType = "json"
+)
+
 type FileProvider struct {
 	content    []byte
 	configName string
-	configType string
+	configType ConfigType
 	paths      []string
 	cache      map[string]interface{}
 }
@@ -26,7 +33,7 @@ func New() *FileProvider {
 	return &FileProvider{
 		content:    []byte{},
 		configName: "app.yml",
-		configType: "yaml",
+		configType: ConfigTypeYAML,
 		cache:      map[string]interface{}{},
 	}
 }
@@ -42,6 +49,16 @@ func (p *FileProvider) SetConfigName(configName string) {
 		return
 	}
 	p.configName = configName
+}
+
+// ConfigType set the config encoding type.  Default is "YAML".  `YAML`, `JSON` are supported
+func (p *FileProvider) ConfigType() ConfigType {
+	return p.configType
+}
+
+// SetConfigType set the config encoding type.  Default is "YAML".  `YAML`, `JSON` are supported
+func (p *FileProvider) SetConfigType(configType ConfigType) {
+	p.configType = configType
 }
 
 // AddPath adds a path to look for config file.  Please don't include filename. Directory only
@@ -114,15 +131,15 @@ func (p *FileProvider) LoadContent(content string) error {
 
 func (p *FileProvider) start() error {
 	switch p.configType {
-	case "yaml", "yml":
+	case ConfigTypeYAML:
 		err := yaml.Unmarshal(p.content, &p.cache)
 		if err != nil {
-			return err
+			return fmt.Errorf("config: yaml unmarshal failed. err: %w", err)
 		}
-	case "json":
+	case ConfigTypeJSON:
 		err := json.Unmarshal(p.content, &p.cache)
 		if err != nil {
-			return err
+			return fmt.Errorf("config: json unmarshal failed. err: %w", err)
 		}
 	default:
 		return config.ErrConfigTypeNotSupport

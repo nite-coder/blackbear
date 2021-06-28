@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/nite-coder/blackbear/pkg/config"
-	"github.com/nite-coder/blackbear/pkg/config/providers/env"
-	"github.com/nite-coder/blackbear/pkg/config/providers/file"
+	"github.com/nite-coder/blackbear/pkg/config/provider/env"
+	"github.com/nite-coder/blackbear/pkg/config/provider/file"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -68,10 +68,11 @@ func TestAddProviders(t *testing.T) {
 	config.AddProvider(envProvider)
 
 	fileProvder := file.New()
-	fileProvder.LoadContent(yamlContent)
+	err := fileProvder.LoadContent(yamlContent)
+	require.NoError(t, err)
 	config.AddProvider(fileProvder)
 
-	err := os.Setenv("ENV", "first")
+	err = os.Setenv("ENV", "first")
 	if err != nil {
 		panic(err)
 	}
