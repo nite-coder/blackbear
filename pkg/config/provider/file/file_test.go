@@ -1,7 +1,12 @@
 package file
 
 import (
+	"io/ioutil"
+	"log"
+	"os"
+	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/nite-coder/blackbear/pkg/config"
 	"github.com/stretchr/testify/assert"
@@ -32,6 +37,12 @@ datasource:
 web:
   port: 10080
   ping: true
+`
+
+	newYamlContent = `
+env: "test1"
+app:
+  id: blackbear1
 `
 
 	jsonContent = `
@@ -66,7 +77,6 @@ web:
 )
 
 func TestConfig(t *testing.T) {
-
 	tests := []struct {
 		format  ConfigType
 		content string
@@ -110,4 +120,55 @@ func TestConfig(t *testing.T) {
 		assert.Equal(t, "graylog", val)
 
 	}
+}
+
+func TestWatchConfig(t *testing.T) {
+	// create temp config
+	tmpDir := os.TempDir()
+	tmpFile, err := ioutil.TempFile(tmpDir, "config.*.yaml")
+	if err != nil {
+		log.Fatal("cannot create temporary file", err)
+	}
+	defer os.Remove(tmpFile.Name())
+
+	//fmt.Println("file: " + tmpFile.Name())
+
+	text := []byte(yamlContent)
+	if _, err = tmpFile.Write(text); err != nil {
+		log.Fatal("failed to write to temporary file", err)
+	}
+	tmpFile.Close()
+
+	fileProvder := New()
+	fileProvder.AddPath(tmpDir)
+	fileProvder.SetConfigName(filepath.Base(tmpFile.Name()))
+	err = fileProvder.WatchConfig()
+	require.NoError(t, err)
+
+	fileProvder.OnChangedEvent = func(oldContent string, newContent string) {
+
+	}
+
+	err = fileProvder.Load()
+	require.NoError(t, err)
+
+	val, err := fileProvder.Get("env")
+	require.NoError(t, err)
+	require.Equal(t, "test", val)
+
+	// replace to new config
+	f, err := os.OpenFile(tmpFile.Name(), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	require.NoError(t, err)
+
+	text = []byte(newYamlContent)
+	if _, err = f.Write(text); err != nil {
+		log.Fatal("failed to write to temporary file", err)
+	}
+	f.Close()
+
+	time.Sleep(2 * time.Second) // wait for onChangedEvent fired
+
+	val, err = fileProvder.Get("env")
+	require.NoError(t, err)
+	require.Equal(t, "test1", val)
 }

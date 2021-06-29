@@ -5,6 +5,7 @@ go 1.15
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.12.0
+	github.com/fsnotify/fsnotify v1.4.9
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.8
 	github.com/mitchellh/mapstructure v1.4.1
