@@ -1,7 +1,7 @@
 package file
 
 import (
-	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -99,7 +99,7 @@ func (p *FileProvider) Load() error {
 	}
 
 	if len(p.contentHash) > 0 {
-		hasher := sha1.New()
+		hasher := sha256.New()
 		hasher.Write(p.content)
 		newHash := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 
@@ -141,7 +141,7 @@ func (p *FileProvider) decode() error {
 
 	p.lastFileUpdatedAt = time.Time{}
 
-	hasher := sha1.New()
+	hasher := sha256.New()
 	hasher.Write(p.content)
 	p.contentHash = base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 	return nil

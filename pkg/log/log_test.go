@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/nite-coder/blackbear/pkg/log"
-	"github.com/nite-coder/blackbear/pkg/log/handlers/discard"
-	"github.com/nite-coder/blackbear/pkg/log/handlers/memory"
+	"github.com/nite-coder/blackbear/pkg/log/handler/discard"
+	"github.com/nite-coder/blackbear/pkg/log/handler/memory"
 	"github.com/stretchr/testify/assert"
 )
 
