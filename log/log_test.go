@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nite-coder/blackbear/pkg/log"
-	"github.com/nite-coder/blackbear/pkg/log/handler/discard"
-	"github.com/nite-coder/blackbear/pkg/log/handler/memory"
+	"github.com/nite-coder/blackbear/log"
+	"github.com/nite-coder/blackbear/log/handler/discard"
+	"github.com/nite-coder/blackbear/log/handler/memory"
 	"github.com/stretchr/testify/assert"
 )
 

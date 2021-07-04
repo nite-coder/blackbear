@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/nite-coder/blackbear/pkg/web"
+	"github.com/nite-coder/blackbear/web"
 )
 
 const toLower = 'a' - 'A'

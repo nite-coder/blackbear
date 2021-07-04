@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nite-coder/blackbear/pkg/log"
+	"github.com/nite-coder/blackbear/log"
 )
 
 // Gelf is an instance of the Gelf logger
