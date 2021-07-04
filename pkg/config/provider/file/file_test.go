@@ -2,7 +2,6 @@ package file
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -126,17 +125,14 @@ func TestWatchConfig(t *testing.T) {
 	// create temp config
 	tmpDir := os.TempDir()
 	tmpFile, err := ioutil.TempFile(tmpDir, "config.*.yaml")
-	if err != nil {
-		log.Fatal("cannot create temporary file", err)
-	}
+	require.NoError(t, err)
 	defer os.Remove(tmpFile.Name())
 
-	//fmt.Println("file: " + tmpFile.Name())
+	// fmt.Println("file: " + tmpFile.Name())
 
 	text := []byte(yamlContent)
-	if _, err = tmpFile.Write(text); err != nil {
-		log.Fatal("failed to write to temporary file", err)
-	}
+	_, err = tmpFile.Write(text)
+	require.NoError(t, err)
 	tmpFile.Close()
 
 	fileProvder := New()
@@ -161,9 +157,8 @@ func TestWatchConfig(t *testing.T) {
 	require.NoError(t, err)
 
 	text = []byte(newYamlContent)
-	if _, err = f.Write(text); err != nil {
-		log.Fatal("failed to write to temporary file", err)
-	}
+	_, err = f.Write(text)
+	require.NoError(t, err)
 	f.Close()
 
 	time.Sleep(2 * time.Second) // wait for onChangedEvent fired

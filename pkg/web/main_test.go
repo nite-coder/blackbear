@@ -12,6 +12,5 @@ func createTestContext() (*Context, *httptest.ResponseRecorder, *WebServer) {
 	}
 	c.WebServer = s
 	c.Writer.reset(w)
-	//c := newContext(nap, nil, w)
 	return c, w, s
 }

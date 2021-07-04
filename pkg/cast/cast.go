@@ -296,7 +296,7 @@ func ToUint(i interface{}) (uint, error) {
 		if err == nil {
 			return uint(v), nil
 		}
-		return 0, fmt.Errorf("unable to cast %#v to uint: %s", i, err)
+		return 0, fmt.Errorf("unable to cast %#v to uint: %w", i, err)
 	case int:
 		if s < 0 {
 			return 0, ErrNegativeNotAllowed
@@ -362,7 +362,7 @@ func ToUint64(i interface{}) (uint64, error) {
 		if err == nil {
 			return v, nil
 		}
-		return 0, fmt.Errorf("unable to cast %#v to uint64: %s", i, err)
+		return 0, fmt.Errorf("unable to cast %#v to uint64: %w", i, err)
 	case int:
 		if s < 0 {
 			return 0, ErrNegativeNotAllowed
@@ -428,7 +428,7 @@ func ToUint32(i interface{}) (uint32, error) {
 		if err == nil {
 			return uint32(v), nil
 		}
-		return 0, fmt.Errorf("unable to cast %#v to uint32: %s", i, err)
+		return 0, fmt.Errorf("unable to cast %#v to uint32: %w", i, err)
 	case int:
 		if s < 0 {
 			return 0, ErrNegativeNotAllowed
@@ -494,7 +494,7 @@ func ToUint16(i interface{}) (uint16, error) {
 		if err == nil {
 			return uint16(v), nil
 		}
-		return 0, fmt.Errorf("unable to cast %#v to uint16: %s", i, err)
+		return 0, fmt.Errorf("unable to cast %#v to uint16: %w", i, err)
 	case int:
 		if s < 0 {
 			return 0, ErrNegativeNotAllowed
@@ -560,7 +560,7 @@ func ToUint8(i interface{}) (uint8, error) {
 		if err == nil {
 			return uint8(v), nil
 		}
-		return 0, fmt.Errorf("unable to cast %#v to uint8: %s", i, err)
+		return 0, fmt.Errorf("unable to cast %#v to uint8: %w", i, err)
 	case int:
 		if s < 0 {
 			return 0, ErrNegativeNotAllowed

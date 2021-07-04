@@ -101,7 +101,7 @@ func (h *GzipMiddleware) Invoke(c *web.Context, next web.HandlerFunc) {
 	// We defer g.pool.Put here so that the gz writer is returned to the
 	// pool if any thing after here fails for some reason (functions in
 	// next could potentially panic, etc)
-	gz := h.pool.Get().(*gzip.Writer)
+	gz, _ := h.pool.Get().(*gzip.Writer)
 	defer h.pool.Put(gz)
 	gz.Reset(w)
 

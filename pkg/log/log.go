@@ -62,6 +62,7 @@ func (l *logger) getLeveledHandlers() func(level Level) []Handler {
 	errorHandlers := l.leveledHandlers[ErrorLevel]
 	panicHandlers := l.leveledHandlers[PanicLevel]
 	fatalHandlers := l.leveledHandlers[FatalLevel]
+	traceHandlers := l.leveledHandlers[TraceLevel]
 
 	return func(level Level) []Handler {
 		switch level {
@@ -77,6 +78,8 @@ func (l *logger) getLeveledHandlers() func(level Level) []Handler {
 			return panicHandlers
 		case FatalLevel:
 			return fatalHandlers
+		case TraceLevel:
+			return traceHandlers
 		}
 
 		return []Handler{}
@@ -324,7 +327,7 @@ func FromContext(ctx context.Context) Context {
 
 func getStackTrace() string {
 	stackBuf := make([]uintptr, 50)
-	length := runtime.Callers(3, stackBuf[:])
+	length := runtime.Callers(3, stackBuf)
 	stack := stackBuf[:length]
 
 	var b strings.Builder

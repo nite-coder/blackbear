@@ -132,7 +132,6 @@ func TestContext(t *testing.T) {
 	logger := log.Str("app", "stant")
 
 	logger.Str("a", "b").Info("hello world")
-	//t.Log(string(h.Out))
 	assert.Equal(t, `{"app":"stant","a":"b","level":"INFO","msg":"hello world"}`+"\n", string(h.Out))
 
 	logger.Bool("bool", true).Info("hello world")
@@ -225,7 +224,6 @@ func TestStdContext(t *testing.T) {
 		assert.Equal(t, `{"request_id":"abc","level":"DEBUG","msg":"test"}`+"\n", string(h.Out))
 
 		logger.Str("app", "santa").Debugf("debug %s", "hello")
-		//t.Log(string(h.Out))
 		assert.Equal(t, `{"request_id":"abc","app":"santa","level":"DEBUG","msg":"debug hello"}`+"\n", string(h.Out))
 	})
 
@@ -233,7 +231,6 @@ func TestStdContext(t *testing.T) {
 		ctx := context.Background()
 		logger := log.FromContext(ctx)
 		logger.Info("test")
-		//t.Log(string(h.Out))
 		assert.Equal(t, `{"level":"INFO","msg":"test"}`+"\n", string(h.Out))
 	})
 }
@@ -269,7 +266,7 @@ func TestStandardFields(t *testing.T) {
 
 	logger.Debug("debug")
 
-	//t.Log(string(h.Out))
+	// t.Log(string(h.Out))
 	assert.Equal(t, `{"hello":"world","strs":["str1","str2"],"is_enabled":true,"int":1,"int8":2,"int16":3,"int32":4,"int64":5,"uint":6,"uint8":7,"uint16":8,"uint32":9,"uint64":10,"float32":11.123,"float64":12.123,"time":"2012-11-01T22:08:41Z","times":["2012-11-01T22:08:41Z","2012-11-01T22:08:41+08:00"],"person":{"Name":"","Age":0},"level":"DEBUG","msg":"debug"}`+"\n", string(h.Out))
 }
 
@@ -283,7 +280,6 @@ func TestAdvancedFields(t *testing.T) {
 	err := errors.New("something bad happened")
 	log.Err(err).Error("too bad")
 
-	//t.Log(string(h.Out))
 	assert.Equal(t, `{"error":"something bad happened","level":"ERROR","msg":"too bad"}`+"\n", string(h.Out))
 
 	log.AutoStaceTrace = true
@@ -321,7 +317,6 @@ func TestHook(t *testing.T) {
 
 	log.Info("upload complete")
 
-	//t.Log(string(h.Out))
 	assert.Equal(t, `{"app_id":"santa","env":"dev","level":"INFO","msg":"upload complete"}`+"\n", string(h.Out))
 }
 
@@ -368,7 +363,7 @@ func TestSaveToDefaultContext(t *testing.T) {
 	log.Bool("answer", true).SaveToDefault()
 	log.Int32("count", 3).Info("hello2")
 
-	//t.Log(string(h.Out))
+	// t.Log(string(h.Out))
 	assert.Equal(t, `{"app":"santa","env":"dev","answer":true,"count":3,"level":"INFO","msg":"hello2"}`+"\n", string(h.Out))
 }
 

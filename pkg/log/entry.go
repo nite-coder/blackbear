@@ -31,7 +31,7 @@ type Entry struct {
 }
 
 func newEntry(l *logger, buf []byte) *Entry {
-	e := entryPool.Get().(*Entry)
+	e, _ := entryPool.Get().(*Entry)
 	e.logger = l
 
 	if buf == nil {
@@ -60,7 +60,7 @@ func putEntry(e *Entry) {
 }
 
 func copyEntry(e *Entry) *Entry {
-	newEntry := entryPool.Get().(*Entry)
+	newEntry, _ := entryPool.Get().(*Entry)
 
 	if len(e.buf) > cap(newEntry.buf) {
 		// append will auto increase slice's capacity  when needed

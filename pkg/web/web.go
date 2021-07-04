@@ -9,14 +9,10 @@ import (
 )
 
 var (
-	_logger *logger
-)
-
-func init() {
-	_logger = &logger{
+	_logger *logger = &logger{
 		mode: off,
 	}
-}
+)
 
 // HandlerFunc defines a function to server HTTP requests
 type HandlerFunc func(c *Context) error
@@ -230,7 +226,7 @@ func (s *WebServer) RunTLS(addr, cert, key string) error {
 // Conforms to the http.Handler interface.
 func (s *WebServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	req.Body = http.MaxBytesReader(w, req.Body, s.MaxRequestBodySize)
-	c := s.pool.Get().(*Context)
+	c, _ := s.pool.Get().(*Context)
 	c.reset(w, req)
 	_ = s.middleware.Execute(c)
 	s.pool.Put(c)
@@ -239,11 +235,12 @@ func (s *WebServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 func build(handlers []MiddlewareHandler) middleware {
 	var next middleware
 
-	if len(handlers) == 0 {
+	switch count := len(handlers); {
+	case count == 0:
 		return voidMiddleware()
-	} else if len(handlers) > 1 {
+	case count > 1:
 		next = build(handlers[1:])
-	} else {
+	default:
 		next = voidMiddleware()
 	}
 

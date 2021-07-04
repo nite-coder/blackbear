@@ -183,10 +183,11 @@ func (r *router) Add(method string, path string, handler HandlerFunc) {
 		}
 
 		var childNode *node
-		
+
 		firstSymbol := element[0]
 
-		if firstSymbol == ':' {
+		switch firstSymbol {
+		case ':':
 			// this is parameter node
 			pName := element[1:]
 			_logger.debug("parameter_node_pname:" + pName)
@@ -211,7 +212,7 @@ func (r *router) Add(method string, path string, handler HandlerFunc) {
 			}
 
 			pathParams = append(pathParams, pName)
-		} else if firstSymbol == '*' {
+		case '*':
 			// this is match any node.  We should allow one match any node only.
 			pName := element[1:]
 			_logger.debug("match_node_pname:" + pName)
@@ -223,7 +224,7 @@ func (r *router) Add(method string, path string, handler HandlerFunc) {
 			}
 
 			pathParams = append(pathParams, pName)
-		} else {
+		default:
 			// this is static node
 			childNode = currentNode.findChildByName(element)
 			if childNode == nil {
@@ -331,7 +332,7 @@ func (r *router) Find(method string, path string, c *Context) HandlerFunc {
 			}
 
 			paramsNum = 0
-			//println("params_count:", len(pathParams))
+			// println("params_count:", len(pathParams))
 			_logger.debug("lastNode_params_count:", len(childNode.params))
 
 			for _, validParam := range childNode.params {

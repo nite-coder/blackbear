@@ -55,31 +55,30 @@ func parseHeaderList(headerList string) []string {
 	headers := make([]string, 0, t)
 
 	for i := 0; i < l; i++ {
-		b := headerList[i]
-		if b >= 'a' && b <= 'z' {
+
+		switch b := headerList[i]; {
+		case b >= 'a' && b <= 'z':
 			if upper {
 				h = append(h, b-toLower)
 			} else {
 				h = append(h, b)
 			}
-		} else if b >= 'A' && b <= 'Z' {
+		case b >= 'A' && b <= 'Z':
 			if !upper {
 				h = append(h, b+toLower)
 			} else {
 				h = append(h, b)
 			}
-		} else if b == '-' || b == '_' || (b >= '0' && b <= '9') {
+		case b == '-' || b == '_' || (b >= '0' && b <= '9'):
 			h = append(h, b)
-		}
-
-		if b == ' ' || b == ',' || i == l-1 {
+		case b == ' ' || b == ',' || i == l-1:
 			if len(h) > 0 {
 				// Flush the found header
 				headers = append(headers, string(h))
 				h = h[:0]
 				upper = true
 			}
-		} else {
+		default:
 			upper = b == '-' || b == '_'
 		}
 	}

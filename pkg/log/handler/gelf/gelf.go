@@ -27,7 +27,7 @@ func New(connectionString string) log.Handler {
 	url, err := url.Parse(connectionString)
 
 	if err != nil {
-		panic(fmt.Errorf("graylog connectionString is wrong: %v", err))
+		panic(fmt.Errorf("graylog connectionString is wrong: %w", err))
 	}
 
 	g := &Gelf{
@@ -149,8 +149,10 @@ func gelfLevel(level log.Level) uint8 {
 		return 4
 	case log.ErrorLevel:
 		return 3
-	case log.FatalLevel:
+	case log.FatalLevel, log.PanicLevel:
 		return 2
+	case log.TraceLevel:
+		return 1
 	default:
 		return 1
 	}
