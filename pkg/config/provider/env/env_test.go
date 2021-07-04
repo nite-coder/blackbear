@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/nite-coder/blackbear/config"
+	"github.com/nite-coder/blackbear/pkg/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

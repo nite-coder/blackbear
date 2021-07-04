@@ -15,8 +15,8 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/nite-coder/blackbear/cast"
-	"github.com/nite-coder/blackbear/config"
+	"github.com/nite-coder/blackbear/pkg/cast"
+	"github.com/nite-coder/blackbear/pkg/config"
 	"gopkg.in/yaml.v3"
 )
 

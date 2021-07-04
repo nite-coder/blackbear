@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http/pprof"
 
-	"github.com/nite-coder/blackbear/web"
+	"github.com/nite-coder/blackbear/pkg/web"
 )
 
 // PPROF is middleware struct

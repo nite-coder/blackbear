@@ -9,7 +9,7 @@ import (
 
 	"github.com/fatih/color"
 	colorable "github.com/mattn/go-colorable"
-	"github.com/nite-coder/blackbear/log"
+	"github.com/nite-coder/blackbear/pkg/log"
 )
 
 func levelToColor(level string) *color.Color {

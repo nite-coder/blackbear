@@ -1,0 +1,22 @@
+app:
+  id: blackbear
+
+logs:
+  - name: clog
+    type: console
+    min_level: debug
+  - name: graylog
+    type: gelf
+    min_level: debug
+
+
+
+datasource:
+  - name1
+  - name2
+  - name3
+
+web:
+  port: 10080
+  ping: true
+

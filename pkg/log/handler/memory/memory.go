@@ -5,7 +5,7 @@ package memory
 import (
 	"sync"
 
-	"github.com/nite-coder/blackbear/log"
+	"github.com/nite-coder/blackbear/pkg/log"
 )
 
 // Handler implementation.

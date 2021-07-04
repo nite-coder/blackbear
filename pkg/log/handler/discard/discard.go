@@ -2,7 +2,7 @@
 package discard
 
 import (
-	"github.com/nite-coder/blackbear/log"
+	"github.com/nite-coder/blackbear/pkg/log"
 )
 
 // Handler implementation.

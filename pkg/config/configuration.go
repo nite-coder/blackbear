@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/nite-coder/blackbear/cast"
+	"github.com/nite-coder/blackbear/pkg/cast"
 )
 
 var (

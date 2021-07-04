@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/nite-coder/blackbear/web"
+	"github.com/nite-coder/blackbear/pkg/web"
 )
 
 // These compression constants are copied from the compress/gzip package.

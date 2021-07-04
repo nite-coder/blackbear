@@ -5,7 +5,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/nite-coder/blackbear/web"
+	"github.com/nite-coder/blackbear/pkg/web"
 )
 
 // Static is a middleware handler that serves static files in the given directory/filesystem.

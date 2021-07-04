@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/nite-coder/blackbear/config"
+	"github.com/nite-coder/blackbear/pkg/config"
 )
 
 type EnvProvider struct {
