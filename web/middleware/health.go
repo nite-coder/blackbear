@@ -3,7 +3,7 @@ package middleware
 import (
 	"strings"
 
-	"github.com/nite-coder/blackbear/pkg/web"
+	"github.com/nite-coder/blackbear/web"
 )
 
 // Health is health middleware struct

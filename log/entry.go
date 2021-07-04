@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nite-coder/blackbear/pkg/log/internal/json"
+	"github.com/nite-coder/blackbear/log/internal/json"
 )
 
 var entryPool = &sync.Pool{
