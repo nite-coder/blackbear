@@ -256,7 +256,9 @@ func (p *FileProvider) Get(key string) (interface{}, error) {
 			continue
 		}
 
-		if temp != nil {
+		myVal, ok := temp.(interface{})
+
+		if ok && myVal != nil {
 			return temp, nil
 		}
 	}
