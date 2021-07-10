@@ -71,7 +71,7 @@ func (c *Cache) Set(key string, val interface{}, d time.Duration) {
 
 // Add an item to the cache, replacing any existing item, using the default
 // expiration.
-func (c *Cache) SetDefaultExpiration(k string, x interface{}) {
+func (c *Cache) SetWithDefaultExp(k string, x interface{}) {
 	c.Set(k, x, DefaultExpiration)
 }
 
@@ -109,6 +109,7 @@ func (c *Cache) Count() int {
 // Delete all expired items from the cache.
 func (c *Cache) DeleteExpired() {
 	now := time.Now().UnixNano()
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
 

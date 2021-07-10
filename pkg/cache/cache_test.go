@@ -23,7 +23,7 @@ func TestCache(t *testing.T) {
 		t.Error("Getting C found value that shouldn't exist:", c)
 	}
 
-	tc.Set("a", 1, DefaultExpiration)
+	tc.SetWithDefaultExp("a", 1)
 	tc.Set("b", "b", DefaultExpiration)
 	tc.Set("c", 3.5, DefaultExpiration)
 
