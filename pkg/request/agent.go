@@ -23,6 +23,8 @@ var (
 			MaxIdleConnsPerHost: 100,
 			MaxIdleConns:        100,
 			IdleConnTimeout:     90 * time.Second,
+			// disable "G402 (CWE-295): TLS MinVersion too low. (Confidence: HIGH, Severity: HIGH)"
+			// #nosec G402
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: false,
 			},
@@ -153,11 +155,17 @@ func (a Agent) SetProxyURL(proxyURL string) Agent {
 	if trans == nil {
 		a.err = errors.New("request: no transport")
 	}
+
 	u, err := url.Parse(proxyURL)
 	if err != nil {
 		a.err = err
 	}
-	trans.Proxy = http.ProxyURL(u)
+
+	p := http.ProxyURL(u)
+	if p != nil {
+		trans.Proxy = p
+	}
+
 	return a
 }
 
@@ -200,14 +208,12 @@ func (a Agent) End() (*Response, error) {
 	}
 
 	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
 
+	ctx, cancel := context.WithCancel(ctx)
 	if a.Timeout > 0 {
-		ctxWithTimeout, cancelWithTimeout := context.WithTimeout(ctx, a.Timeout)
-		ctx = ctxWithTimeout
-		cancel = cancelWithTimeout
+		ctx, cancel = context.WithTimeout(ctx, a.Timeout)
 	}
+	defer cancel()
 
 	// create new request
 	url := a.URL
@@ -224,12 +230,16 @@ func (a Agent) End() (*Response, error) {
 	// send to target
 	resp, err := a.client.Do(outReq.WithContext(ctx))
 	if err != nil {
-		if err, ok := err.(net.Error); ok && err.Timeout() {
+		var errTimeout net.Error
+		if errors.As(err, &errTimeout) && errTimeout.Timeout() {
 			return nil, ErrTimeout
 		}
 		return nil, err
 	}
-	defer respClose(resp.Body)
+	defer func() {
+		_ = respClose(resp.Body)
+	}()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
