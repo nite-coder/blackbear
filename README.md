@@ -1,4 +1,4 @@
-# blackbear [![GoDoc][doc-img]][doc] [![Build][ci-img]][ci] [![GoReport][report-img]][report]
+# blackbear [![GoDoc][doc-img]][doc] [![Build][ci-img]][ci] [![GoReport][report-img]][report] [![Security][security-img]][security]
 A Go light framework helps to develop your application faster
 
 
@@ -8,3 +8,5 @@ A Go light framework helps to develop your application faster
 [ci]: https://github.com/nite-coder/blackbear/actions
 [report-img]: https://goreportcard.com/badge/github.com/nite-coder/blackbear
 [report]: https://goreportcard.com/report/github.com/nite-coder/blackbear
+[security-img]: https://github.com/nite-coder/blackbear/actions/workflows/codeql-analysis.yml/badge.svg
+[security]: https://github.com/nite-coder/blackbear/security
