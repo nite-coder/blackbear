@@ -161,7 +161,7 @@ func TestWatchConfig(t *testing.T) {
 	require.NoError(t, err)
 	f.Close()
 
-	time.Sleep(2 * time.Second) // wait for onChangedEvent fired
+	time.Sleep(3 * time.Second) // wait for onChangedEvent fired
 
 	val, err = fileProvder.Get("env")
 	require.NoError(t, err)

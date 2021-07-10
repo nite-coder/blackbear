@@ -286,7 +286,7 @@ func (p *FileProvider) WatchConfig() error {
 
 			for {
 
-				timer := time.NewTimer(1 * time.Second)
+				timer := time.NewTimer(2 * time.Second)
 
 				select {
 				case event, ok := <-watcher.Events:
@@ -329,6 +329,7 @@ func (p *FileProvider) WatchConfig() error {
 		if err != nil {
 			log.Fatal(err)
 		}
+		
 		wg.Done()
 		<-done
 	}()
