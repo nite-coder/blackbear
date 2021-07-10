@@ -136,7 +136,7 @@ func ToInt32(i interface{}) (int32, error) {
 	case float32:
 		return int32(s), nil
 	case string:
-		v, err := strconv.ParseInt(s, 0, 0)
+		v, err := strconv.ParseInt(s, 0, 32)
 		if err == nil {
 			return int32(v), nil
 		}
@@ -181,7 +181,7 @@ func ToInt16(i interface{}) (int16, error) {
 	case float32:
 		return int16(s), nil
 	case string:
-		v, err := strconv.ParseInt(s, 0, 0)
+		v, err := strconv.ParseInt(s, 0, 16)
 		if err == nil {
 			return int16(v), nil
 		}
@@ -226,7 +226,7 @@ func ToInt8(i interface{}) (int8, error) {
 	case float32:
 		return int8(s), nil
 	case string:
-		v, err := strconv.ParseInt(s, 0, 0)
+		v, err := strconv.ParseInt(s, 0, 8)
 		if err == nil {
 			return int8(v), nil
 		}

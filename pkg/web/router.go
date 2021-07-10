@@ -249,9 +249,7 @@ func (r *router) Find(method string, path string, c *Context) HandlerFunc {
 	_logger.debug("method:" + method)
 	_logger.debug("path:" + path)
 
-	if path[0] == '/' && len(path) > 1 {
-		path = path[1:]
-	}
+	path = sanitizeUrl(path)
 
 	currentNode := r.tree.rootNode
 	if path == "/" {
@@ -266,6 +264,10 @@ func (r *router) Find(method string, path string, c *Context) HandlerFunc {
 	var paramsNum int
 
 	for index, element := range pathArray {
+		if len(element) == 0 {
+			continue
+		}
+
 		// find static node first
 		childNode := currentNode.findChildByName(element)
 
@@ -438,4 +440,11 @@ func (n *node) findHandler(method string) HandlerFunc {
 	default:
 		panic("method was invalid")
 	}
+}
+
+func sanitizeUrl(redir string) string {
+	if len(redir) > 1 && redir[0] == '/' && redir[1] != '/' && redir[1] != '\\' {
+		return redir
+	}
+	return "/"
 }
