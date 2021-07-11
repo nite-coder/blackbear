@@ -25,7 +25,7 @@ logs:
     min_level: debug
   - name: graylog
     type: gelf
-    min_level: debug
+    min_level: info
 
 datasource:
   - name1
@@ -41,7 +41,7 @@ web:
 type LogItem struct {
 	Name     string
 	Type     string
-	MinLevel string
+	MinLevel string `yaml:"min_level" mapstructure:"min_level"`
 }
 
 type Web struct {
@@ -50,8 +50,10 @@ type Web struct {
 }
 
 type Root struct {
-	Env string
-	Web Web
+	Env        string
+	Web        Web
+	Datasource []string  `yaml:"datasource"`
+	Logs       []LogItem `yaml:"logs"`
 }
 
 func TestNoProvider(t *testing.T) {
@@ -168,4 +170,8 @@ func TestScan(t *testing.T) {
 	assert.Equal(t, 10080, root.Web.Port)
 	assert.Equal(t, true, root.Web.Ping)
 	assert.Equal(t, "test", root.Env)
+	assert.Equal(t, "clog", root.Logs[0].Name)
+	assert.Equal(t, "console", root.Logs[0].Type)
+	assert.Equal(t, "debug", root.Logs[0].MinLevel)
+	assert.Equal(t, "name1", root.Datasource[0])
 }
