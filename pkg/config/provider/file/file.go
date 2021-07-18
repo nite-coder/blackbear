@@ -175,12 +175,12 @@ func (p *FileProvider) getConfigPath() (string, error) {
 		}
 
 		configPath = filepath.Clean(filepath.Join(path, p.configName))
-		_, err := os.Stat(p.configPath)
+		_, err := os.Stat(configPath)
 
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
 				if (idx + 1) == len(p.paths) {
-					return "", fmt.Errorf("%w.  Directory are %v", config.ErrFileNotFound, p.paths)
+					return "", fmt.Errorf("%w.  Directories are %v, ConfigName is %s", config.ErrFileNotFound, p.paths, p.configName)
 				}
 
 				continue
