@@ -1,6 +1,7 @@
 package file
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -119,6 +120,13 @@ func TestConfig(t *testing.T) {
 		assert.Equal(t, "graylog", val)
 
 	}
+}
+
+func TestLoadPathOrdert(t *testing.T) {
+	fileProvder := New()
+	err := fileProvder.Load()
+
+	assert.True(t, errors.Is(err, config.ErrFileNotFound))
 }
 
 func TestWatchConfig(t *testing.T) {

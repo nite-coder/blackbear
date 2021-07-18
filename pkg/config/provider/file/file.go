@@ -173,8 +173,8 @@ func (p *FileProvider) getConfigPath() (string, error) {
 			continue
 		}
 
-		configPath = filepath.Join(path, p.configName)
-		_, err := os.Stat(filepath.Clean(p.configPath))
+		configPath = filepath.Clean(filepath.Join(path, p.configName))
+		_, err := os.Stat(p.configPath)
 
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
@@ -329,7 +329,7 @@ func (p *FileProvider) WatchConfig() error {
 		if err != nil {
 			log.Fatal(err)
 		}
-		
+
 		wg.Done()
 		<-done
 	}()
