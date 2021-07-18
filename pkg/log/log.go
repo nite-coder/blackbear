@@ -1,7 +1,6 @@
 package log
 
 import (
-	stdlog "log"
 	"sync"
 )
 
@@ -270,18 +269,5 @@ func (l *logger) getLeveledHandlers() func(level Level) []Handler {
 		}
 
 		return []Handler{}
-	}
-}
-
-// Flush clear all handler's buffer
-func (l *logger) Flush() {
-	for _, h := range l.handles {
-		flusher, ok := h.(Flusher)
-		if ok {
-			err := flusher.Flush()
-			if err != nil {
-				stdlog.Printf("log: flush log handler: %v", err)
-			}
-		}
 	}
 }

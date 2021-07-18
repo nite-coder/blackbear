@@ -191,7 +191,7 @@ func TestFlush(t *testing.T) {
 	log.SetLogger(logger)
 
 	log.Debug("flush")
-	logger.Flush()
+	log.Flush()
 	assert.Equal(t, 0, len(h.Out))
 }
 

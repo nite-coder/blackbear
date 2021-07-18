@@ -3,6 +3,7 @@ package log
 import (
 	"context"
 	"fmt"
+	stdlog "log"
 	"runtime"
 	"strings"
 	"sync/atomic"
@@ -195,6 +196,19 @@ func FromContext(ctx context.Context) Context {
 	}
 
 	return v.(Context)
+}
+
+// Flush clear all handler's buffer
+func Flush() {
+	for _, h := range Logger().handles {
+		flusher, ok := h.(Flusher)
+		if ok {
+			err := flusher.Flush()
+			if err != nil {
+				stdlog.Printf("log: flush log handler: %v", err)
+			}
+		}
+	}
 }
 
 func getStackTrace() string {
