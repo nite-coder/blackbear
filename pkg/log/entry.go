@@ -37,10 +37,10 @@ func newEntry(l *logger, buf []byte) *Entry {
 	if buf == nil {
 		e.buf = e.buf[:0]
 		e.buf = enc.AppendBeginMarker(e.buf)
-	} else {
-		e.buf = buf // race condition here because it use context's buf.  However, we create new buf within handler func
+		return e
 	}
 
+	e.buf = buf // race condition here because it use context's buf.  However, we create new buf within handler func
 	return e
 }
 
@@ -466,11 +466,13 @@ func (e *Entry) StackTrace() *Entry {
 }
 
 func handler(e *Entry) {
+	l := Logger()
+
 	for _, h := range e.logger.cacheLeveledHandlers(e.Level) {
 		newEntry := copyEntry(e)
 
 		// call hook interface
-		for _, hooker := range _logger.hooks {
+		for _, hooker := range l.hooks {
 			_ = hooker(newEntry)
 		}
 

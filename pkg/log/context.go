@@ -17,13 +17,13 @@ func newContext(l *logger) Context {
 		logger: l,
 	}
 
-	if len(l.buf) > 0 {
-		c.buf = copyBytes(l.buf)
-	} else {
+	if len(l.buf) == 0 {
 		c.buf = make([]byte, 0, 500)
 		c.buf = enc.AppendBeginMarker(c.buf)
+		return c
 	}
 
+	c.buf = copyBytes(l.buf)
 	return c
 }
 
@@ -47,73 +47,73 @@ func (c Context) SaveToDefault() {
 
 // Debug level formatted message.
 func (c Context) Debug(msg string) {
-	e := newEntry(_logger, c.buf)
+	e := newEntry(c.logger, c.buf)
 	e.Debug(msg)
 }
 
 // Debugf level formatted message.
 func (c Context) Debugf(msg string, v ...interface{}) {
-	e := newEntry(_logger, c.buf)
+	e := newEntry(c.logger, c.buf)
 	e.Debugf(msg, v...)
 }
 
 // Info level formatted message.
 func (c Context) Info(msg string) {
-	e := newEntry(_logger, c.buf)
+	e := newEntry(c.logger, c.buf)
 	e.Info(msg)
 }
 
 // Infof level formatted message.
 func (c Context) Infof(msg string, v ...interface{}) {
-	e := newEntry(_logger, c.buf)
+	e := newEntry(c.logger, c.buf)
 	e.Infof(msg, v...)
 }
 
 // Warn level formatted message.
 func (c Context) Warn(msg string) {
-	e := newEntry(_logger, c.buf)
+	e := newEntry(c.logger, c.buf)
 	e.Warn(msg)
 }
 
 // Warnf level formatted message.
 func (c Context) Warnf(msg string, v ...interface{}) {
-	e := newEntry(_logger, c.buf)
+	e := newEntry(c.logger, c.buf)
 	e.Warnf(msg, v...)
 }
 
 // Error level formatted message
 func (c Context) Error(msg string) {
-	e := newEntry(_logger, c.buf)
+	e := newEntry(c.logger, c.buf)
 	e.Error(msg)
 }
 
 // Errorf level formatted message
 func (c Context) Errorf(msg string, v ...interface{}) {
-	e := newEntry(_logger, c.buf)
+	e := newEntry(c.logger, c.buf)
 	e.Errorf(msg, v...)
 }
 
 // Panic level formatted message
 func (c Context) Panic(msg string) {
-	e := newEntry(_logger, c.buf)
+	e := newEntry(c.logger, c.buf)
 	e.Panic(msg)
 }
 
 // Panicf level formatted message
 func (c Context) Panicf(msg string, v ...interface{}) {
-	e := newEntry(_logger, c.buf)
+	e := newEntry(c.logger, c.buf)
 	e.Panicf(msg, v...)
 }
 
 // Fatal level formatted message
 func (c Context) Fatal(msg string) {
-	e := newEntry(_logger, c.buf)
+	e := newEntry(c.logger, c.buf)
 	e.Fatal(msg)
 }
 
 // Fatalf level formatted message
 func (c Context) Fatalf(msg string, v ...interface{}) {
-	e := newEntry(_logger, c.buf)
+	e := newEntry(c.logger, c.buf)
 	e.Fatalf(msg, v...)
 }
 
@@ -287,5 +287,14 @@ func (c Context) Interface(key string, val interface{}) Context {
 
 // WithContext return a new context with a log context value
 func (c Context) WithContext(ctx context.Context) context.Context {
-	return newStdContext(ctx, c)
+	return context.WithValue(ctx, ctxKey, c)
+}
+
+// Logger returns the logger with the context previously set.
+func (c Context) Logger() *logger {
+	c.logger.rwMutex.Lock()
+	defer c.logger.rwMutex.Unlock()
+
+	c.logger.buf = copyBytes(c.buf)
+	return c.logger
 }

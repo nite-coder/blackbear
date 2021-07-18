@@ -13,6 +13,7 @@ type Person struct {
 }
 
 func TestEntryFields(t *testing.T) {
+	_logger := Logger()
 	entry := newEntry(_logger, nil)
 
 	time1, _ := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")

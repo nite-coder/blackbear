@@ -19,19 +19,20 @@ type Person struct {
 }
 
 func TestNoHandler(t *testing.T) {
-	log.RemoveAllHandlers()
 	log.Info("no handler 1")
 	log.Warnf("no handler 2")
 }
 
 func TestAddHandlers(t *testing.T) {
-	log.RemoveAllHandlers()
+	logger := log.New()
 
 	h1 := memory.New()
-	log.AddHandler(h1, log.AllLevels...)
+	logger.AddHandler(h1, log.AllLevels...)
 
 	h2 := memory.New()
-	log.AddHandler(h2, log.AllLevels...)
+	logger.AddHandler(h2, log.AllLevels...)
+
+	log.SetLogger(logger)
 
 	log.Info("info")
 	assert.Equal(t, `{"level":"INFO","msg":"info"}`+"\n", string(h1.Out))
@@ -50,10 +51,12 @@ func (h *ErrHandler) Write(bytes []byte) error {
 }
 
 func TestErrorHandler(t *testing.T) {
-	h1 := &ErrHandler{}
+	logger := log.New()
 
-	log.RemoveAllHandlers()
-	log.AddHandler(h1, log.AllLevels...)
+	h1 := &ErrHandler{}
+	logger.AddHandler(h1, log.AllLevels...)
+
+	log.SetLogger(logger)
 
 	isErr := false
 	log.ErrorHandler = func(err error) {
@@ -65,11 +68,14 @@ func TestErrorHandler(t *testing.T) {
 }
 
 func TestLog(t *testing.T) {
-	log.RemoveAllHandlers()
-	log.AutoStaceTrace = false
+	logger := log.New()
 
 	h := memory.New()
-	log.AddHandler(h, log.AllLevels...)
+	logger.AddHandler(h, log.AllLevels...)
+
+	log.SetLogger(logger)
+
+	log.AutoStaceTrace = false
 
 	log.Debug("debug")
 	assert.Equal(t, `{"level":"DEBUG","msg":"debug"}`+"\n", string(h.Out))
@@ -125,16 +131,18 @@ func TestLog(t *testing.T) {
 }
 
 func TestContext(t *testing.T) {
-	log.RemoveAllHandlers()
+	logger := log.New()
+
 	h := memory.New()
-	log.AddHandler(h, log.AllLevels...)
+	logger.AddHandler(h, log.AllLevels...)
+	log.SetLogger(logger)
 
-	logger := log.Str("app", "stant")
+	c := log.Str("app", "stant")
 
-	logger.Str("a", "b").Info("hello world")
+	c.Str("a", "b").Info("hello world")
 	assert.Equal(t, `{"app":"stant","a":"b","level":"INFO","msg":"hello world"}`+"\n", string(h.Out))
 
-	logger.Bool("bool", true).Info("hello world")
+	c.Bool("bool", true).Info("hello world")
 	assert.Equal(t, `{"app":"stant","bool":true,"level":"INFO","msg":"hello world"}`+"\n", string(h.Out))
 
 	log.Int("int", 1).Info("info")
@@ -175,18 +183,19 @@ func TestContext(t *testing.T) {
 }
 
 func TestFlush(t *testing.T) {
-	log.RemoveAllHandlers()
+	logger := log.New()
+
 	h := memory.New()
-	log.AddHandler(h, log.GetLevelsFromMinLevel("debug")...)
+	logger.AddHandler(h, log.GetLevelsFromMinLevel("debug")...)
+
+	log.SetLogger(logger)
 
 	log.Debug("flush")
-	log.Flush()
+	logger.Flush()
 	assert.Equal(t, 0, len(h.Out))
 }
 
 func TestLevels(t *testing.T) {
-	log.RemoveAllHandlers()
-
 	levels := log.GetLevelsFromMinLevel("debug")
 	assert.Equal(t, log.AllLevels, levels)
 
@@ -210,10 +219,12 @@ func TestLevels(t *testing.T) {
 }
 
 func TestStdContext(t *testing.T) {
-	log.RemoveAllHandlers()
+	logger := log.New()
 
 	h := memory.New()
-	log.AddHandler(h, log.AllLevels...)
+	logger.AddHandler(h, log.AllLevels...)
+
+	log.SetLogger(logger)
 
 	t.Run("create new context", func(t *testing.T) {
 		ctx := context.Background()
@@ -236,15 +247,17 @@ func TestStdContext(t *testing.T) {
 }
 
 func TestStandardFields(t *testing.T) {
-	log.RemoveAllHandlers()
+	logger := log.New()
 
 	h := memory.New()
-	log.AddHandler(h, log.GetLevelsFromMinLevel("debug")...)
+	logger.AddHandler(h, log.GetLevelsFromMinLevel("debug")...)
+
+	log.SetLogger(logger)
 
 	time1, _ := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 	time2, _ := time.Parse(time.RFC3339, "2012-11-01T22:08:41+08:00")
 
-	logger := log.
+	logger = log.
 		Str("hello", "world").
 		Strs("strs", []string{"str1", "str2"}).
 		Bool("is_enabled", true).
@@ -262,7 +275,7 @@ func TestStandardFields(t *testing.T) {
 		Float64("float64", float64(12.123)).
 		Time("time", time1).
 		Times("times", []time.Time{time1, time2}).
-		Interface("person", Person{})
+		Interface("person", Person{}).Logger()
 
 	logger.Debug("debug")
 
@@ -271,11 +284,14 @@ func TestStandardFields(t *testing.T) {
 }
 
 func TestAdvancedFields(t *testing.T) {
-	log.RemoveAllHandlers()
-	log.AutoStaceTrace = false
+	logger := log.New()
 
 	h := memory.New()
-	log.AddHandler(h, log.AllLevels...)
+	logger.AddHandler(h, log.AllLevels...)
+
+	log.SetLogger(logger)
+
+	log.AutoStaceTrace = false
 
 	err := errors.New("something bad happened")
 	log.Err(err).Error("too bad")
@@ -305,15 +321,17 @@ func (h *AppHook) Hook(e *log.Entry) error {
 }
 
 func TestHook(t *testing.T) {
-	log.RemoveAllHandlers()
+	logger := log.New()
 
 	h := memory.New()
-	log.AddHandler(h, log.AllLevels...)
+	logger.AddHandler(h, log.AllLevels...)
 
-	_ = log.AddHook(func(e *log.Entry) error {
+	_ = logger.AddHook(func(e *log.Entry) error {
 		e.Str("app_id", "santa").Str("env", "dev")
 		return nil
 	})
+
+	log.SetLogger(logger)
 
 	log.Info("upload complete")
 
@@ -321,16 +339,18 @@ func TestHook(t *testing.T) {
 }
 
 func TestGoroutineSafe(t *testing.T) {
-	log.RemoveAllHandlers()
+	logger := log.New()
 
 	h := memory.New()
-	log.AddHandler(h, log.AllLevels...)
+	logger.AddHandler(h, log.AllLevels...)
 
-	logger := log.Str("request_id", "abc")
+	log.SetLogger(logger)
+
+	logger = log.Str("request_id", "abc").Logger()
 
 	var wg sync.WaitGroup
 
-	wg.Add(2)
+	wg.Add(3)
 
 	go func() {
 		defer wg.Done()
@@ -344,18 +364,26 @@ func TestGoroutineSafe(t *testing.T) {
 		logger.Info("test")
 	}()
 
+	go func() {
+		defer wg.Done()
+		logger := log.New()
+		log.SetLogger(logger)
+		log.Info("test")
+	}()
+
 	wg.Wait()
 }
 
 func TestSaveToDefaultContext(t *testing.T) {
-	log.RemoveAllHandlers()
-	h := memory.New()
-	log.AddHandler(h, log.AllLevels...)
-
-	log.
+	logger := log.New()
+	logger = logger.
 		Str("app", "santa").
-		Str("env", "dev").
-		SaveToDefault()
+		Str("env", "dev").Logger()
+
+	h := memory.New()
+	logger.AddHandler(h, log.AllLevels...)
+
+	log.SetLogger(logger)
 
 	log.Debug("hello")
 	assert.Equal(t, `{"app":"santa","env":"dev","level":"DEBUG","msg":"hello"}`+"\n", string(h.Out))
@@ -371,8 +399,11 @@ func BenchmarkDisabledAddingFields(b *testing.B) {
 	b.Logf("Logging without any structured context.")
 
 	b.Run("jasnosoft/log", func(b *testing.B) {
+		logger := log.New()
 		h := discard.New()
-		log.AddHandler(h, log.InfoLevel)
+		logger.AddHandler(h, log.InfoLevel)
+		log.SetLogger(logger)
+
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
