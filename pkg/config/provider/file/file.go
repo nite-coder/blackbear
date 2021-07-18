@@ -162,9 +162,10 @@ func (p *FileProvider) getConfigPath() (string, error) {
 		if err != nil {
 			return "", err
 		}
+		path = filepath.Dir(path)
 
 		p.AddPath(filepath.Join(path, "config"))
-		p.AddPath(filepath.Dir(path))
+		p.AddPath(path)
 	}
 
 	configPath := ""
@@ -179,7 +180,7 @@ func (p *FileProvider) getConfigPath() (string, error) {
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
 				if (idx + 1) == len(p.paths) {
-					return "", fmt.Errorf("%w.  Path is %s", config.ErrFileNotFound, p.configPath)
+					return "", fmt.Errorf("%w.  Directory are %v", config.ErrFileNotFound, p.paths)
 				}
 
 				continue
