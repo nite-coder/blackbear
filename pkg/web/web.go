@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"html/template"
 	"net/http"
 	"path"
@@ -54,6 +55,7 @@ func WrapHandler(h http.Handler) HandlerFunc {
 
 // WebServer is root level of framework instance
 type WebServer struct {
+	server           *http.Server
 	pool             sync.Pool
 	handlers         []MiddlewareHandler
 	middleware       middleware
@@ -179,7 +181,15 @@ func (s *WebServer) Run(addr string) error {
 	serv := new(http.Server)
 	serv.Addr = addr
 	serv.Handler = s
+	s.server = serv
 	return serv.ListenAndServe()
+}
+
+func (s *WebServer) Shutdown(ctx context.Context) error {
+	if s.server == nil {
+		return nil
+	}
+	return s.server.Shutdown(ctx)
 }
 
 // RunAll will listen on multiple port
