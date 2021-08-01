@@ -60,7 +60,10 @@ func TestNoProvider(t *testing.T) {
 	config.RemoveAllPrividers()
 
 	_, err := config.String("hello")
-	require.ErrorIs(t, config.ErrProviderNotFound, err)
+	require.ErrorIs(t, config.ErrKeyNotFound, err)
+
+	count, _ := config.Int("app.wokrer_count", 5)
+	assert.Equal(t, 5, count)
 }
 
 func TestAddProviders(t *testing.T) {
