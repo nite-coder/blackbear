@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"sync"
+	"time"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/nite-coder/blackbear/pkg/cast"
@@ -172,6 +173,27 @@ func Bool(key string, defaultValue ...bool) (bool, error) {
 	}
 
 	return false, ErrKeyNotFound
+}
+
+// Bool returns a boolean type value which has the key.
+func Duration(key string, defaultValue ...time.Duration) (time.Duration, error) {
+	for _, p := range cfg.providers {
+		val, err := p.Get(key)
+
+		if err != nil {
+			continue
+		}
+
+		return cast.ToDuration(val)
+	}
+
+	var d time.Duration
+
+	if len(defaultValue) > 0 {
+		return defaultValue[0], nil
+	}
+
+	return d, ErrKeyNotFound
 }
 
 // Scan binds a value which has the key.

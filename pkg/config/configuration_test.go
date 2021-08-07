@@ -3,6 +3,7 @@ package config_test
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/nite-coder/blackbear/pkg/config"
 	"github.com/nite-coder/blackbear/pkg/config/provider/env"
@@ -16,6 +17,7 @@ var (
 env: "test"
 app:
   id: blackbear
+  timeout_sec: 60
 
 money: 123.42
 
@@ -134,6 +136,9 @@ func TestConverterType(t *testing.T) {
 	val, err = config.String("logs.Hello", defaultValue)
 	assert.NoError(t, err)
 	assert.Equal(t, defaultValue, val)
+
+	timeoutSec, _ := config.Duration("app.timeout_sec", 180)
+	assert.Equal(t, time.Duration(60), timeoutSec)
 }
 
 func TestScan(t *testing.T) {
