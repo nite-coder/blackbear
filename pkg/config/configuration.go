@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"sync"
+	"time"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/nite-coder/blackbear/pkg/cast"
@@ -43,10 +44,6 @@ func RemoveAllPrividers() {
 
 // String returns a string type value which has the key.
 func String(key string, defaultValue ...string) (string, error) {
-	if len(cfg.providers) == 0 {
-		return "", ErrProviderNotFound
-	}
-
 	for _, p := range cfg.providers {
 		val, err := p.Get(key)
 
@@ -66,10 +63,6 @@ func String(key string, defaultValue ...string) (string, error) {
 
 // Int returns a int type value which has the key.
 func Int(key string, defaultValue ...int) (int, error) {
-	if len(cfg.providers) == 0 {
-		return 0, ErrProviderNotFound
-	}
-
 	for _, p := range cfg.providers {
 		val, err := p.Get(key)
 
@@ -89,10 +82,6 @@ func Int(key string, defaultValue ...int) (int, error) {
 
 // Int32 returns a int32 type value which has the key.
 func Int32(key string, defaultValue ...int32) (int32, error) {
-	if len(cfg.providers) == 0 {
-		return 0, ErrProviderNotFound
-	}
-
 	for _, p := range cfg.providers {
 		val, err := p.Get(key)
 
@@ -112,10 +101,6 @@ func Int32(key string, defaultValue ...int32) (int32, error) {
 
 // Int64 returns a int64 type value which has the key.
 func Int64(key string, defaultValue ...int64) (int64, error) {
-	if len(cfg.providers) == 0 {
-		return 0, ErrProviderNotFound
-	}
-
 	for _, p := range cfg.providers {
 		val, err := p.Get(key)
 
@@ -135,10 +120,6 @@ func Int64(key string, defaultValue ...int64) (int64, error) {
 
 // Float32 returns a float32 type value which has the key.
 func Float32(key string, defaultValue ...float32) (float32, error) {
-	if len(cfg.providers) == 0 {
-		return 0, ErrProviderNotFound
-	}
-
 	for _, p := range cfg.providers {
 		val, err := p.Get(key)
 
@@ -158,10 +139,6 @@ func Float32(key string, defaultValue ...float32) (float32, error) {
 
 // Float64 returns a float64 type value which has the key.
 func Float64(key string, defaultValue ...float64) (float64, error) {
-	if len(cfg.providers) == 0 {
-		return 0, ErrProviderNotFound
-	}
-
 	for _, p := range cfg.providers {
 		val, err := p.Get(key)
 
@@ -181,10 +158,6 @@ func Float64(key string, defaultValue ...float64) (float64, error) {
 
 // Bool returns a boolean type value which has the key.
 func Bool(key string, defaultValue ...bool) (bool, error) {
-	if len(cfg.providers) == 0 {
-		return false, ErrProviderNotFound
-	}
-
 	for _, p := range cfg.providers {
 		val, err := p.Get(key)
 
@@ -202,12 +175,29 @@ func Bool(key string, defaultValue ...bool) (bool, error) {
 	return false, ErrKeyNotFound
 }
 
-// Scan binds a value which has the key.
-func Scan(key string, value interface{}) error {
-	if len(cfg.providers) == 0 {
-		return ErrProviderNotFound
+// Bool returns a boolean type value which has the key.
+func Duration(key string, defaultValue ...time.Duration) (time.Duration, error) {
+	for _, p := range cfg.providers {
+		val, err := p.Get(key)
+
+		if err != nil {
+			continue
+		}
+
+		return cast.ToDuration(val)
 	}
 
+	var d time.Duration
+
+	if len(defaultValue) > 0 {
+		return defaultValue[0], nil
+	}
+
+	return d, ErrKeyNotFound
+}
+
+// Scan binds a value which has the key.
+func Scan(key string, value interface{}) error {
 	for _, p := range cfg.providers {
 		val, err := p.Get(key)
 

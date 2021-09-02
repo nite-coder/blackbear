@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"html/template"
 	"strconv"
+	"strings"
+	"time"
 )
 
 var ErrNegativeNotAllowed = errors.New("unable to cast negative value")
@@ -720,5 +722,37 @@ func ToFloat32(i interface{}) (float32, error) {
 		return 0, nil
 	default:
 		return 0, fmt.Errorf("unable to cast %#v of type %T to float32", i, i)
+	}
+}
+
+// ToDuration casts an interface to a time.Duration type.
+func ToDuration(i interface{}) (d time.Duration, err error) {
+	switch s := i.(type) {
+	case time.Duration:
+		return s, nil
+	case int, int64, int32, int16, int8, uint, uint64, uint32, uint16, uint8:
+		val, err := ToInt64(s)
+		if err != nil {
+			return d, err
+		}
+		d := time.Duration(val)
+		return d, nil
+	case float32, float64:
+		val, err := ToFloat64(s)
+		if err != nil {
+			return d, err
+		}
+		d = time.Duration(val)
+		return d, err
+	case string:
+		if strings.ContainsAny(s, "nsuµmh") {
+			d, err = time.ParseDuration(s)
+		} else {
+			d, err = time.ParseDuration(s + "ns")
+		}
+		return
+	default:
+		err = fmt.Errorf("unable to cast %#v of type %T to Duration", i, i)
+		return
 	}
 }
