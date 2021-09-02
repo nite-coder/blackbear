@@ -6,6 +6,7 @@ import (
 	"io"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/fatih/color"
 	colorable "github.com/mattn/go-colorable"
@@ -79,7 +80,7 @@ func (h *Console) Write(bytes []byte) error {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
-	_, _ = color.Fprintf(h.writer, "%s %-50s", bold.Sprintf("%-8s", level), msg)
+	_, _ = color.Fprintf(h.writer, "%s %s %-50s", time.Now().Format("2006-01-02 15:04:05.000Z"), bold.Sprintf("%-8s", level), msg)
 
 	for _, k := range keys {
 		fmt.Fprintf(h.writer, " %s=%v", color.Sprint(k), fmt.Sprintf("%v", kv[k]))
