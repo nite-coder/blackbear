@@ -1,6 +1,7 @@
 package config_test
 
 import (
+	"errors"
 	"os"
 	"testing"
 	"time"
@@ -62,7 +63,7 @@ func TestNoProvider(t *testing.T) {
 	config.RemoveAllPrividers()
 
 	_, err := config.String("hello")
-	require.ErrorIs(t, config.ErrKeyNotFound, err)
+	require.True(t, errors.Is(err, config.ErrKeyNotFound))
 
 	count, _ := config.Int("app.wokrer_count", 5)
 	assert.Equal(t, 5, count)

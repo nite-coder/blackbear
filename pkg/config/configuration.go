@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -58,7 +59,7 @@ func String(key string, defaultValue ...string) (string, error) {
 		return defaultValue[0], nil
 	}
 
-	return "", ErrKeyNotFound
+	return "", fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
 }
 
 // Int returns a int type value which has the key.
@@ -77,7 +78,7 @@ func Int(key string, defaultValue ...int) (int, error) {
 		return defaultValue[0], nil
 	}
 
-	return 0, ErrKeyNotFound
+	return 0, fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
 }
 
 // Int32 returns a int32 type value which has the key.
@@ -96,7 +97,7 @@ func Int32(key string, defaultValue ...int32) (int32, error) {
 		return defaultValue[0], nil
 	}
 
-	return 0, ErrKeyNotFound
+	return 0, fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
 }
 
 // Int64 returns a int64 type value which has the key.
@@ -115,7 +116,7 @@ func Int64(key string, defaultValue ...int64) (int64, error) {
 		return defaultValue[0], nil
 	}
 
-	return 0, ErrKeyNotFound
+	return 0, fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
 }
 
 // Float32 returns a float32 type value which has the key.
@@ -134,7 +135,7 @@ func Float32(key string, defaultValue ...float32) (float32, error) {
 		return defaultValue[0], nil
 	}
 
-	return 0, ErrKeyNotFound
+	return 0, fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
 }
 
 // Float64 returns a float64 type value which has the key.
@@ -153,7 +154,7 @@ func Float64(key string, defaultValue ...float64) (float64, error) {
 		return defaultValue[0], nil
 	}
 
-	return 0, ErrKeyNotFound
+	return 0, fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
 }
 
 // Bool returns a boolean type value which has the key.
@@ -172,7 +173,7 @@ func Bool(key string, defaultValue ...bool) (bool, error) {
 		return defaultValue[0], nil
 	}
 
-	return false, ErrKeyNotFound
+	return false, fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
 }
 
 // Bool returns a boolean type value which has the key.
@@ -193,7 +194,7 @@ func Duration(key string, defaultValue ...time.Duration) (time.Duration, error) 
 		return defaultValue[0], nil
 	}
 
-	return d, ErrKeyNotFound
+	return d, fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
 }
 
 // Scan binds a value which has the key.
@@ -212,5 +213,5 @@ func Scan(key string, value interface{}) error {
 		return nil
 	}
 
-	return ErrKeyNotFound
+	return fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
 }
