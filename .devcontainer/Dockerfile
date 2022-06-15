@@ -19,6 +19,7 @@ USER vscode
 RUN go get -u github.com/golang/protobuf/protoc-gen-go
 RUN go get -u github.com/stretchr/testify
 RUN go install github.com/golang/mock/mockgen@v1.6.0
+RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.46.2
 
 # [Optional] Uncomment this line to install global node packages.
 # RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g <your-package-here>" 2>&1
