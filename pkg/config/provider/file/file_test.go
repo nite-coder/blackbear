@@ -122,7 +122,7 @@ func TestConfig(t *testing.T) {
 	}
 }
 
-func TestLoadPathOrdert(t *testing.T) {
+func TestLoadPathOrder(t *testing.T) {
 	fileProvder := New()
 	err := fileProvder.Load()
 	assert.True(t, errors.Is(err, config.ErrFileNotFound))

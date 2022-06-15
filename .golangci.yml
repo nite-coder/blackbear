@@ -6,7 +6,4 @@ linters:
     - gci
     - errorlint
     - exhaustive
-    - forcetypeassert
     - gocritic
-
-

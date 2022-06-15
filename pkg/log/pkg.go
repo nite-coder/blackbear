@@ -200,7 +200,11 @@ func FromContext(ctx context.Context) Context {
 		return newContext(_logger)
 	}
 
-	return v.(Context)
+	c, ok := v.(Context)
+	if !ok {
+		return newContext(_logger)
+	}
+	return c
 }
 
 // Flush clear all handler's buffer

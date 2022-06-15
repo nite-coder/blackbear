@@ -18,6 +18,10 @@
 		"--security-opt",
 		"seccomp=unconfined"
 	],
+	// Use this environment variable if you need to bind mount your local source code into a new container.
+	"remoteEnv": {
+		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+	},
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
 		"go.toolsManagement.checkForUpdates": "local",
@@ -59,7 +63,6 @@
 			"-v",
 			"-race"
 		],
-		"go.testTimeout": "10s",
 		"go.coverOnSingleTest": true,
 		"go.coverOnSingleTestFile": true,
 		"go.coverOnTestPackage": true
