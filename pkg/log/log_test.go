@@ -180,6 +180,9 @@ func TestContext(t *testing.T) {
 
 	log.Float64("float64", 1).Info("info")
 	assert.Equal(t, `{"float64":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
+
+	log.Any("person", Person{Name: "Alice", Age: 26}).Info("info")
+	assert.Equal(t, `{"person":{"Name":"Alice","Age":26},"level":"INFO","msg":"info"}`+"\n", string(h.Out))
 }
 
 func TestFlush(t *testing.T) {
@@ -275,7 +278,7 @@ func TestStandardFields(t *testing.T) {
 		Float64("float64", float64(12.123)).
 		Time("time", time1).
 		Times("times", []time.Time{time1, time2}).
-		Interface("person", Person{}).Logger()
+		Any("person", Person{}).Logger()
 
 	logger.Debug("debug")
 

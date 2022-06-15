@@ -199,6 +199,12 @@ func (l *logger) Float64(key string, val float64) Context {
 	return c.Float64(key, val)
 }
 
+// Any add val field to current context
+func (l *logger) Any(key string, val interface{}) Context {
+	c := newContext(l)
+	return c.Any(key, val)
+}
+
 // Err add error field to current context
 func (l *logger) Err(err error) Context {
 	c := newContext(l)

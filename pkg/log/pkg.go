@@ -174,6 +174,11 @@ func Float64(key string, val float64) Context {
 	return Logger().Float64(key, val)
 }
 
+// Any adds val field to current context
+func Any(key string, val interface{}) Context {
+	return Logger().Any(key, val)
+}
+
 // Err add error field to current context
 func Err(err error) Context {
 	return Logger().Err(err)

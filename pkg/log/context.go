@@ -277,8 +277,8 @@ func (c Context) Times(key string, val []time.Time) Context {
 	return c
 }
 
-// Interface adds the field key with i marshaled using reflection.
-func (c Context) Interface(key string, val interface{}) Context {
+// Any adds the field key with i marshaled using reflection.
+func (c Context) Any(key string, val interface{}) Context {
 	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendInterface(c.buf, val)

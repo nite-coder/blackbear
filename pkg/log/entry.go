@@ -441,8 +441,8 @@ func (e *Entry) Dur(key string, d time.Duration) *Entry {
 	return e
 }
 
-// Interface adds the field key with i marshaled using reflection.
-func (e *Entry) Interface(key string, val interface{}) *Entry {
+// Any adds the field key with i marshaled using reflection.
+func (e *Entry) Any(key string, val interface{}) *Entry {
 	if e == nil {
 		return e
 	}

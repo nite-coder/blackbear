@@ -38,7 +38,7 @@ func TestEntryFields(t *testing.T) {
 		Float64("float64", float64(12.123)).
 		Time("time", time1).
 		Times("times", []time.Time{time1, time2}).
-		Interface("person", Person{})
+		Any("person", Person{})
 
 	entry.Debug("debug")
 
