@@ -206,7 +206,13 @@ func Scan(key string, value interface{}) error {
 			continue
 		}
 
-		err = mapstructure.Decode(val, value)
+		decoder, _ := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+			DecodeHook:       mapstructure.StringToTimeDurationHookFunc(),
+			WeaklyTypedInput: true,
+			Result:           value,
+		})
+
+		err = decoder.Decode(val)
 		if err != nil {
 			return err
 		}

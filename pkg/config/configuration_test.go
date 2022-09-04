@@ -26,9 +26,11 @@ logs:
   - name: clog
     type: console
     min_level: debug
+    timeout: 5s
   - name: graylog
     type: gelf
     min_level: info
+    timeout: 5s
 
 datasource:
   - name1
@@ -44,7 +46,8 @@ web:
 type LogItem struct {
 	Name     string
 	Type     string
-	MinLevel string `yaml:"min_level" mapstructure:"min_level"`
+	MinLevel string        `yaml:"min_level" mapstructure:"min_level"`
+	Timeout  time.Duration `yaml:"timeout" mapstructure:"timeout"`
 }
 
 type Web struct {
@@ -155,6 +158,7 @@ func TestScan(t *testing.T) {
 	err = config.Scan("logs", &logSetting)
 	require.NoError(t, err)
 	assert.Equal(t, "clog", logSetting[0].Name)
+	assert.Equal(t, float64(5), logSetting[0].Timeout.Seconds())
 
 	data := []string{}
 	err = config.Scan("datasource", &data)

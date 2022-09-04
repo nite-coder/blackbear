@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2022-09-04
+
+- `config.scan` supports string to `time.Duration`
+
 ## 2022-06-15
 
 - rename `log.Inferface` to `log.Any`
