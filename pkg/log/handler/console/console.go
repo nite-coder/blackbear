@@ -12,8 +12,9 @@ import (
 	"github.com/nite-coder/blackbear/pkg/log"
 )
 
+// color: https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 var (
-	timeColor = color.New(color.FgBlack)
+	timeColor = color.New(90) // gray
 
 	debugLevelColor   = color.New(color.Bold).Add(color.FgGreen)
 	infoLevelColor    = color.New(color.Bold).Add(color.FgBlue)
