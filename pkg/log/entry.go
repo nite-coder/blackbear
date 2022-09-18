@@ -22,17 +22,18 @@ var enc = json.Encoder{}
 
 // Entry defines a single log entry
 type Entry struct {
-	logger *logger
-	start  time.Time
-	buf    []byte
+	start time.Time
+	buf   []byte
 
-	Level   Level  `json:"level"`
-	Message string `json:"message"`
+	Logger    *logger
+	Level     Level     `json:"level"`
+	Message   string    `json:"message"`
+	CreatedAt time.Time `json:"time"`
 }
 
 func newEntry(l *logger, buf []byte) *Entry {
 	e, _ := entryPool.Get().(*Entry)
-	e.logger = l
+	e.Logger = l
 
 	if buf == nil {
 		e.buf = e.buf[:0]
@@ -41,6 +42,7 @@ func newEntry(l *logger, buf []byte) *Entry {
 	}
 
 	e.buf = buf // race condition here because it use context's buf.  However, we create new buf within handler func
+	e.CreatedAt = time.Now().UTC()
 	return e
 }
 
@@ -73,10 +75,11 @@ func copyEntry(e *Entry) *Entry {
 		copy(newEntry.buf, e.buf)
 	}
 
-	newEntry.logger = e.logger
+	newEntry.Logger = e.Logger
 	newEntry.start = e.start
 	newEntry.Level = e.Level
 	newEntry.Message = e.Message
+	newEntry.CreatedAt = e.CreatedAt
 	return newEntry
 }
 
@@ -466,13 +469,13 @@ func (e *Entry) StackTrace() *Entry {
 }
 
 func handler(e *Entry) {
-	l := Logger()
-
-	for _, h := range e.logger.cacheLeveledHandlers(e.Level) {
+	for _, h := range e.Logger.cacheLeveledHandlers(e.Level) {
 		newEntry := copyEntry(e)
 
+		e.CreatedAt = time.Now().UTC()
+
 		// call hook interface
-		for _, hooker := range l.hooks {
+		for _, hooker := range e.Logger.hooks {
 			_ = hooker(newEntry)
 		}
 
@@ -494,7 +497,7 @@ func handler(e *Entry) {
 			if ErrorHandler != nil {
 				ErrorHandler(err)
 			} else {
-				stdlog.Printf("log: log write failed: %v", err)
+				stdlog.Printf("log: fail to write log: %v", err)
 			}
 		}
 
