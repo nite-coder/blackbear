@@ -11,14 +11,11 @@ import (
 // Handler implementation.
 type Handler struct {
 	mu sync.Mutex
-	//Out []byte
 }
 
 // New handler.
 func New() *Handler {
-	return &Handler{
-		//Out: make([]byte, 500),
-	}
+	return &Handler{}
 }
 
 // BeforeWriting implements log.Handler.
@@ -37,7 +34,6 @@ func (h *Handler) Write(bytes []byte) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	fmt.Fprintf(os.Stdout, "%s\n", bytes)
-	//h.Out = bytes
 	return nil
 }
 
