@@ -13,6 +13,8 @@ import (
 )
 
 var (
+	timeColor = color.New(color.FgBlack)
+
 	debugLevelColor   = color.New(color.Bold).Add(color.FgGreen)
 	infoLevelColor    = color.New(color.Bold).Add(color.FgBlue)
 	warnLevelColor    = color.New(color.Bold).Add(color.FgYellow)
@@ -69,7 +71,10 @@ func New(opts ConsoleOptions) log.Handler {
 // BeforeWriting handles the log entry
 func (h *Console) BeforeWriting(e *log.Entry) error {
 	e.Str("level", e.Level.String())
-	e.Time("time", e.CreatedAt)
+
+	if !e.Logger.DisableTimeField {
+		e.Str("time", e.CreatedAt.Format("2006-01-02 15:04:05.000Z"))
+	}
 
 	return nil
 }
@@ -86,7 +91,6 @@ func (h *Console) Write(bytes []byte) error {
 	level := fmt.Sprintf("%v", kv["level"])
 	msg := kv["msg"]
 	levelColor := levelToColor(level)
-	time := kv["time"]
 
 	// sort map by key
 	keys := make([]string, 0, len(kv))
@@ -100,14 +104,21 @@ func (h *Console) Write(bytes []byte) error {
 	}
 
 	sort.Strings(keys)
+
 	// fmt is not goroutine safe
 	// https://stackoverflow.com/questions/14694088/is-it-safe-for-more-than-one-goroutine-to-print-to-stdout
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
-	_, _ = fmt.Fprintf(h.writer, "%s %s %s", time, levelColor.Sprintf("%-6s", level), msg)
+	time, found := kv["time"]
+	if found {
+		_, _ = fmt.Fprintf(h.writer, "%s %s %s", timeColor.Sprint(time), levelColor.Sprintf("%-6s", level), msg)
+	} else {
+		_, _ = fmt.Fprintf(h.writer, "%s %s", levelColor.Sprintf("%-6s", level), msg)
+	}
 
-	for _, k := range keys {
+	for i := range keys {
+		k := keys[i]
 		if k == "time" {
 			continue
 		}

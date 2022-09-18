@@ -34,6 +34,7 @@ type Entry struct {
 func newEntry(l *logger, buf []byte) *Entry {
 	e, _ := entryPool.Get().(*Entry)
 	e.Logger = l
+	e.CreatedAt = time.Now().UTC()
 
 	if buf == nil {
 		e.buf = e.buf[:0]
@@ -42,7 +43,6 @@ func newEntry(l *logger, buf []byte) *Entry {
 	}
 
 	e.buf = buf // race condition here because it use context's buf.  However, we create new buf within handler func
-	e.CreatedAt = time.Now().UTC()
 	return e
 }
 
@@ -471,8 +471,6 @@ func (e *Entry) StackTrace() *Entry {
 func handler(e *Entry) {
 	for _, h := range e.Logger.cacheLeveledHandlers(e.Level) {
 		newEntry := copyEntry(e)
-
-		e.CreatedAt = time.Now().UTC()
 
 		// call hook interface
 		for _, hooker := range e.Logger.hooks {

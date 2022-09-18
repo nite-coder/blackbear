@@ -25,6 +25,10 @@ func New() *Handler {
 func (h *Handler) BeforeWriting(e *log.Entry) error {
 	e.Str("level", e.Level.String())
 
+	if !e.Logger.DisableTimeField {
+		e.Str("time", e.CreatedAt.Format("2006-01-02 15:04:05.000Z"))
+	}
+
 	return nil
 }
 
