@@ -25,6 +25,8 @@ type logger struct {
 	cacheLeveledHandlers func(level Level) []Handler
 	rwMutex              sync.RWMutex
 	buf                  []byte
+
+	DisableTimeField bool
 }
 
 func New() *logger {

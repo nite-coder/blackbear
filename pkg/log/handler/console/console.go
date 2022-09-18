@@ -4,48 +4,77 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"sort"
 	"sync"
-	"time"
 
 	"github.com/fatih/color"
-	colorable "github.com/mattn/go-colorable"
 	"github.com/nite-coder/blackbear/pkg/log"
+)
+
+var (
+	timeColor = color.New(color.FgBlack)
+
+	debugLevelColor   = color.New(color.Bold).Add(color.FgGreen)
+	infoLevelColor    = color.New(color.Bold).Add(color.FgBlue)
+	warnLevelColor    = color.New(color.Bold).Add(color.FgYellow)
+	errorLevelColor   = color.New(color.Bold).Add(color.FgHiRed)
+	defaultLevelColor = color.New(color.Bold).Add(color.FgHiRed)
+
+	keyColor   = color.New(color.FgCyan)
+	valueColor = color.New(color.FgWhite)
 )
 
 func levelToColor(level string) *color.Color {
 	switch level {
 	case "DEBUG":
-		return color.New(color.FgWhite)
+		return debugLevelColor
 	case "INFO":
-		return color.New(color.FgBlue)
+		return infoLevelColor
 	case "WARN":
-		return color.New(color.FgYellow)
+		return warnLevelColor
 	case "ERROR", "PANIC", "FATAL":
-		return color.New(color.FgRed)
+		return errorLevelColor
 	default:
-		return color.New(color.FgWhite)
+		return defaultLevelColor
 	}
 }
-
-var bold = color.New(color.Bold)
 
 // Console is an instance of the console logger
 type Console struct {
 	mutex  sync.Mutex
 	writer io.Writer
+
+	DisableColor bool
+}
+
+type ConsoleOptions struct {
+	DisableColor bool
 }
 
 // New create a new Console instance
-func New() log.Handler {
-	return &Console{
-		writer: colorable.NewColorableStdout(),
+func New(opts ConsoleOptions) log.Handler {
+
+	h := Console{
+		writer: os.Stdout,
 	}
+
+	color.NoColor = true
+
+	if !opts.DisableColor {
+		color.NoColor = false
+	}
+
+	return &h
 }
 
 // BeforeWriting handles the log entry
 func (h *Console) BeforeWriting(e *log.Entry) error {
 	e.Str("level", e.Level.String())
+
+	if !e.Logger.DisableTimeField {
+		e.Str("time", e.CreatedAt.Format("2006-01-02 15:04:05.000Z"))
+	}
 
 	return nil
 }
@@ -61,7 +90,7 @@ func (h *Console) Write(bytes []byte) error {
 
 	level := fmt.Sprintf("%v", kv["level"])
 	msg := kv["msg"]
-	color := levelToColor(level)
+	levelColor := levelToColor(level)
 
 	// sort map by key
 	keys := make([]string, 0, len(kv))
@@ -75,15 +104,25 @@ func (h *Console) Write(bytes []byte) error {
 	}
 
 	sort.Strings(keys)
+
 	// fmt is not goroutine safe
 	// https://stackoverflow.com/questions/14694088/is-it-safe-for-more-than-one-goroutine-to-print-to-stdout
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
-	_, _ = color.Fprintf(h.writer, "%s %s %-50s", time.Now().Format("2006-01-02 15:04:05.000Z"), bold.Sprintf("%-8s", level), msg)
+	time, found := kv["time"]
+	if found {
+		_, _ = fmt.Fprintf(h.writer, "%s %s %s", timeColor.Sprint(time), levelColor.Sprintf("%-6s", level), msg)
+	} else {
+		_, _ = fmt.Fprintf(h.writer, "%s %s", levelColor.Sprintf("%-6s", level), msg)
+	}
 
-	for _, k := range keys {
-		fmt.Fprintf(h.writer, " %s=%v", color.Sprint(k), fmt.Sprintf("%v", kv[k]))
+	for i := range keys {
+		k := keys[i]
+		if k == "time" {
+			continue
+		}
+		_, _ = fmt.Fprintf(h.writer, " %s=%v", keyColor.Sprint(k), valueColor.Sprintf("%v", kv[k]))
 	}
 
 	fmt.Fprintln(h.writer)

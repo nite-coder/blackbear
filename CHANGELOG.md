@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2022-09-18
+
+- refactor: improve log console color output
+
 ## 2022-09-04
 
 - `config.scan` supports string to `time.Duration`

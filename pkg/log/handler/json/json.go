@@ -10,20 +10,21 @@ import (
 
 // Handler implementation.
 type Handler struct {
-	mu  sync.Mutex
-	Out []byte
+	mu sync.Mutex
 }
 
 // New handler.
 func New() *Handler {
-	return &Handler{
-		Out: make([]byte, 500),
-	}
+	return &Handler{}
 }
 
 // BeforeWriting implements log.Handler.
 func (h *Handler) BeforeWriting(e *log.Entry) error {
 	e.Str("level", e.Level.String())
+
+	if !e.Logger.DisableTimeField {
+		e.Str("time", e.CreatedAt.Format("2006-01-02 15:04:05.000Z"))
+	}
 
 	return nil
 }
@@ -33,7 +34,6 @@ func (h *Handler) Write(bytes []byte) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	fmt.Fprintf(os.Stdout, "%s\n", bytes)
-	h.Out = bytes
 	return nil
 }
 

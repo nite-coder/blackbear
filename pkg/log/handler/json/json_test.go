@@ -6,6 +6,7 @@ import (
 
 func Example_log() {
 	logger := log.New()
+	logger.DisableTimeField = true
 	h := New()
 	logger.AddHandler(h, log.AllLevels...)
 	log.SetLogger(logger)
