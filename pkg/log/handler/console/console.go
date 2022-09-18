@@ -16,11 +16,11 @@ import (
 var (
 	timeColor = color.New(90) // gray
 
-	debugLevelColor   = color.New(color.Bold).Add(color.FgGreen)
-	infoLevelColor    = color.New(color.Bold).Add(color.FgBlue)
-	warnLevelColor    = color.New(color.Bold).Add(color.FgYellow)
-	errorLevelColor   = color.New(color.Bold).Add(color.FgHiRed)
-	defaultLevelColor = color.New(color.Bold).Add(color.FgHiRed)
+	debugLevelColor   = color.New(color.Bold, color.FgGreen)
+	infoLevelColor    = color.New(color.Bold, color.FgBlue)
+	warnLevelColor    = color.New(color.Bold, color.FgYellow)
+	errorLevelColor   = color.New(color.Bold, color.FgHiRed)
+	defaultLevelColor = color.New(color.Bold, color.FgHiRed)
 
 	keyColor   = color.New(color.FgCyan)
 	valueColor = color.New(color.FgWhite)
