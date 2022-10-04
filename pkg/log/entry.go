@@ -42,7 +42,7 @@ func newEntry(l *logger, buf []byte) *Entry {
 		return e
 	}
 
-	e.buf = buf // race condition here because it use context's buf.  However, we create new buf within handler func
+	e.buf = copyBytes(buf)
 	return e
 }
 
