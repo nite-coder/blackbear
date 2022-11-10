@@ -3,7 +3,6 @@ linters:
     - gosec
     - misspell
     - sqlclosecheck
-    - gci
     - errorlint
     - exhaustive
     - gocritic
