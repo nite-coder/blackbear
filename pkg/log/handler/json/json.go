@@ -33,7 +33,7 @@ func (h *Handler) BeforeWriting(e *log.Entry) error {
 func (h *Handler) Write(bytes []byte) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	fmt.Fprintf(os.Stdout, "%s\n", bytes)
+	fmt.Fprintf(os.Stdout, "%s", bytes)
 	return nil
 }
 

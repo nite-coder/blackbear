@@ -5,13 +5,19 @@ import (
 	"sync"
 )
 
-// Cache is a LRU cache.
+// LRUCache is a LRU cache.
 type LRUCache struct {
 	maxItems int64
 	count    int64
 	ll       *list.List
 	mu       *sync.RWMutex
 	cache    map[string]*list.Element
+}
+
+// LRUCacher is a LRU cache interface
+type LRUCacher interface {
+	Add(key string, val interface{})
+	Get(key string) (interface{}, bool)
 }
 
 type entry struct {
