@@ -2,7 +2,6 @@ package file
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -131,7 +130,7 @@ func TestLoadPathOrder(t *testing.T) {
 func TestWatchConfig(t *testing.T) {
 	// create temp config
 	tmpDir := os.TempDir()
-	tmpFile, err := ioutil.TempFile(tmpDir, "config.*.yaml")
+	tmpFile, err := os.CreateTemp(tmpDir, "config.*.yaml")
 	require.NoError(t, err)
 	defer os.Remove(tmpFile.Name())
 

@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"compress/gzip"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"sync"
@@ -47,7 +47,7 @@ func (grw gzipResponseWriter) Write(b []byte) (int, error) {
 		return grw.gz.Write(b)
 	}
 	// no compress
-	grw.gz.Reset(ioutil.Discard)
+	grw.gz.Reset(io.Discard)
 	return grw.napWriter.Write(b)
 }
 
@@ -62,7 +62,7 @@ func NewGzip(level int) *GzipMiddleware {
 	h := &GzipMiddleware{}
 
 	h.pool.New = func() interface{} {
-		gz, err := gzip.NewWriterLevel(ioutil.Discard, level)
+		gz, err := gzip.NewWriterLevel(io.Discard, level)
 		if err != nil {
 			panic(err)
 		}

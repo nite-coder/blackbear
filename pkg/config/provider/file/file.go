@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -93,7 +92,7 @@ func (p *FileProvider) Load() error {
 		return err
 	}
 
-	p.content, err = ioutil.ReadFile(filepath.Clean(p.configPath))
+	p.content, err = os.ReadFile(filepath.Clean(p.configPath))
 	if err != nil {
 		return fmt.Errorf("config: read file error: %w", err)
 	}

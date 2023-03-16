@@ -8,7 +8,6 @@ import (
 	"encoding/xml"
 	"errors"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
@@ -240,7 +239,7 @@ func (a Agent) End() (*Response, error) {
 		_ = respClose(resp.Body)
 	}()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -260,7 +259,7 @@ func respClose(body io.ReadCloser) error {
 	if body == nil {
 		return nil
 	}
-	if _, err := io.Copy(ioutil.Discard, body); err != nil {
+	if _, err := io.Copy(io.Discard, body); err != nil {
 		return err
 	}
 	return body.Close()
