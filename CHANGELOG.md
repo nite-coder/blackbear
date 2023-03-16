@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2023-03-16
+
+- add generic cache v2
+
 ## 2022-09-18
 
 - refactor: improve log console color output

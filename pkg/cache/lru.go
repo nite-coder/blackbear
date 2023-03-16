@@ -10,13 +10,13 @@ type LRUCache struct {
 	maxItems int64
 	count    int64
 	ll       *list.List
-	mu       *sync.RWMutex
+	mu       sync.RWMutex
 	cache    map[string]*list.Element
 }
 
 // LRUCacher is a LRU cache interface
 type LRUCacher interface {
-	Add(key string, val interface{})
+	Put(key string, val interface{})
 	Get(key string) (interface{}, bool)
 }
 
@@ -30,13 +30,13 @@ func NewLRU(maxItems int64) *LRUCache {
 	return &LRUCache{
 		maxItems: maxItems,
 		ll:       list.New(),
-		mu:       &sync.RWMutex{},
+		mu:       sync.RWMutex{},
 		cache:    make(map[string]*list.Element),
 	}
 }
 
-// Add adds a value to the cache.
-func (c *LRUCache) Add(key string, val interface{}) {
+// Put adds a value to the cache.
+func (c *LRUCache) Put(key string, val interface{}) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 

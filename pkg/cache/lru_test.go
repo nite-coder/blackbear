@@ -8,9 +8,9 @@ import (
 
 func TestLRU(t *testing.T) {
 	lru := NewLRU(2)
-	lru.Add("key1", "val1")
-	lru.Add("key2", "val2")
-	lru.Add("key3", "val3")
+	lru.Put("key1", "val1")
+	lru.Put("key2", "val2")
+	lru.Put("key3", "val3")
 
 	val2, ok := lru.Get("key2")
 	assert.Equal(t, "val2", val2)
