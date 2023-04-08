@@ -18,7 +18,7 @@ var (
 env: "test"
 app:
   id: blackbear
-  timeout_sec: 60
+  timeout: 60s
 
 money: 123.42
 
@@ -40,6 +40,10 @@ datasource:
 web:
   port: 10080
   ping: true
+
+book:
+  book1: john
+  book2: angela 
 `
 )
 
@@ -141,8 +145,17 @@ func TestConverterType(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, defaultValue, val)
 
-	timeoutSec, _ := config.Duration("app.timeout_sec", 180)
-	assert.Equal(t, time.Duration(60), timeoutSec)
+	timeout, _ := config.Duration("app.timeout", 180*time.Second)
+	assert.Equal(t, time.Duration(60*time.Second), timeout)
+
+	// string to map
+	bookMap, err := config.StringMap("book")
+	assert.NoError(t, err)
+	assert.Equal(t, "angela", bookMap["book2"])
+
+	bookMapString, err := config.StringMapString("book")
+	assert.NoError(t, err)
+	assert.Equal(t, "angela", bookMapString["book2"])
 }
 
 func TestScan(t *testing.T) {

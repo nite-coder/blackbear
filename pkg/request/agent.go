@@ -124,8 +124,8 @@ func (a Agent) DELETE(targetURL string) Agent {
 	return a
 }
 
-// Set that set HTTP header to agent
-func (a Agent) Set(key, val string) Agent {
+// AddHeader that set HTTP header to agent
+func (a Agent) AddHeader(key, val string) Agent {
 	newHeader := map[string]string{}
 
 	if a.Header != nil {
@@ -176,7 +176,7 @@ func (a Agent) SendBytes(bytes []byte) Agent {
 
 // SendJSON send json to target URL
 func (a Agent) SendJSON(v interface{}) Agent {
-	newAgent := a.Set("Content-Type", "application/json")
+	newAgent := a.AddHeader("Content-Type", "application/json")
 	b, err := json.Marshal(v)
 	if err != nil {
 		newAgent.err = err
@@ -186,7 +186,7 @@ func (a Agent) SendJSON(v interface{}) Agent {
 
 // SendXML send json to target URL
 func (a Agent) SendXML(v interface{}) Agent {
-	newAgent := a.Set("Content-Type", "application/xml")
+	newAgent := a.AddHeader("Content-Type", "application/xml")
 	b, err := xml.Marshal(v)
 	if err != nil {
 		newAgent.err = err
@@ -196,7 +196,7 @@ func (a Agent) SendXML(v interface{}) Agent {
 
 // Send send string to target URL
 func (a Agent) Send(body string) Agent {
-	newAgent := a.Set("Content-Type", "application/x-www-form-urlencoded")
+	newAgent := a.AddHeader("Content-Type", "application/x-www-form-urlencoded")
 	return newAgent.SendBytes([]byte(body))
 }
 

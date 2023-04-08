@@ -62,6 +62,50 @@ func String(key string, defaultValue ...string) (string, error) {
 	return "", fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
 }
 
+// StringMap returns a map[string]interface{} type value which has the key.
+func StringMap(key string, defaultValue ...map[string]interface{}) (map[string]interface{}, error) {
+	cfg.rwMutex.RLock()
+	defer cfg.rwMutex.RUnlock()
+
+	for _, p := range cfg.providers {
+		val, err := p.Get(key)
+
+		if err != nil {
+			continue
+		}
+
+		return cast.ToStringMap(val)
+	}
+
+	if len(defaultValue) > 0 {
+		return defaultValue[0], nil
+	}
+
+	return nil, fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
+}
+
+// StringMapString returns a map[string]string type value which has the key.
+func StringMapString(key string, defaultValue ...map[string]string) (map[string]string, error) {
+	cfg.rwMutex.RLock()
+	defer cfg.rwMutex.RUnlock()
+
+	for _, p := range cfg.providers {
+		val, err := p.Get(key)
+
+		if err != nil {
+			continue
+		}
+
+		return cast.ToStringMapString(val)
+	}
+
+	if len(defaultValue) > 0 {
+		return defaultValue[0], nil
+	}
+
+	return nil, fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
+}
+
 // Int returns a int type value which has the key.
 func Int(key string, defaultValue ...int) (int, error) {
 	for _, p := range cfg.providers {

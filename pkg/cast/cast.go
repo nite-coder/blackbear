@@ -1,6 +1,7 @@
 package cast
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -755,4 +756,68 @@ func ToDuration(i interface{}) (d time.Duration, err error) {
 		err = fmt.Errorf("unable to cast %#v of type %T to Duration", i, i)
 		return
 	}
+}
+
+// ToStringMap casts an interface to a map[string]interface{} type.
+func ToStringMap(i interface{}) (map[string]interface{}, error) {
+	var m = map[string]interface{}{}
+
+	switch v := i.(type) {
+	case map[interface{}]interface{}:
+		for k, val := range v {
+			key, _ := ToString(k)
+			m[key] = val
+		}
+		return m, nil
+	case map[string]interface{}:
+		return v, nil
+	case string:
+		err := jsonStringToObject(v, &m)
+		return m, err
+	default:
+		return m, fmt.Errorf("unable to cast %#v of type %T to map[string]interface{}", i, i)
+	}
+}
+
+// ToStringMapString casts an interface to a map[string]string type.
+func ToStringMapString(i interface{}) (map[string]string, error) {
+	var m = map[string]string{}
+
+	switch v := i.(type) {
+	case map[string]string:
+		return v, nil
+	case map[string]interface{}:
+		for k, val := range v {
+			key, _ := ToString(k)
+			value, _ := ToString(val)
+			m[key] = value
+		}
+		return m, nil
+	case map[interface{}]string:
+		for k, val := range v {
+			key, _ := ToString(k)
+			value, _ := ToString(val)
+			m[key] = value
+		}
+		return m, nil
+	case map[interface{}]interface{}:
+		for k, val := range v {
+			key, _ := ToString(k)
+			value, _ := ToString(val)
+			m[key] = value
+		}
+		return m, nil
+	case string:
+		err := jsonStringToObject(v, &m)
+		return m, err
+	default:
+		return m, fmt.Errorf("unable to cast %#v of type %T to map[string]string", i, i)
+	}
+}
+
+// jsonStringToObject attempts to unmarshall a string as JSON into
+// the object passed as pointer.
+func jsonStringToObject(s string, v interface{}) error {
+	data := []byte(s)
+	return json.Unmarshal(data, v)
 }
