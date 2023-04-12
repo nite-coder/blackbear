@@ -294,7 +294,8 @@ func (p *FileProvider) WatchConfig() error {
 						return
 					}
 					log.Println("event:", event)
-					if event.Op&fsnotify.Write == fsnotify.Write {
+					if event.Op&fsnotify.Write == fsnotify.Write ||
+						event.Op&fsnotify.Rename == fsnotify.Rename {
 						isUpdate = true
 						log.Println("modified file:", event.Name)
 					}

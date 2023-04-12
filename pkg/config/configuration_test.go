@@ -37,13 +37,16 @@ datasource:
   - name2
   - name3
 
+currency: ["btc", "usdt", "usd"]
+users: [1,2,3]
+
 web:
   port: 10080
   ping: true
 
 book:
   book1: john
-  book2: angela 
+  book2: angela
 `
 )
 
@@ -156,6 +159,28 @@ func TestConverterType(t *testing.T) {
 	bookMapString, err := config.StringMapString("book")
 	assert.NoError(t, err)
 	assert.Equal(t, "angela", bookMapString["book2"])
+
+	stringSlice, err := config.StringSlice("currency")
+	assert.NoError(t, err)
+	assert.Len(t, stringSlice, 3)
+	assert.Equal(t, stringSlice[2], "usd")
+
+	defaultStringSlice := []string{"usdt"}
+	stringSlice, err = config.StringSlice("currency1", defaultStringSlice)
+	assert.NoError(t, err)
+	assert.Len(t, stringSlice, 1)
+	assert.Equal(t, stringSlice[0], "usdt")
+
+	intSlice, err := config.IntSlice("users")
+	assert.NoError(t, err)
+	assert.Len(t, intSlice, int(3))
+	assert.Equal(t, int(3), intSlice[2])
+
+	defaultIntSlice := []int{100}
+	intSlice, err = config.IntSlice("users1", defaultIntSlice)
+	assert.NoError(t, err)
+	assert.Len(t, intSlice, 1)
+	assert.Equal(t, intSlice[0], 100)
 }
 
 func TestScan(t *testing.T) {

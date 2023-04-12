@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2023-04-12
+
+- config: add `IntSlice` and `StringSlice` functions
+
 ## 2023-04-08
 
 - config: add `StringMap` and `StringMapString` functions

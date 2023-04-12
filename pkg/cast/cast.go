@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -812,6 +813,102 @@ func ToStringMapString(i interface{}) (map[string]string, error) {
 		return m, err
 	default:
 		return m, fmt.Errorf("unable to cast %#v of type %T to map[string]string", i, i)
+	}
+}
+
+// ToStringSlice casts an interface to a []string type.
+func ToStringSlice(i interface{}) ([]string, error) {
+	var a []string
+
+	switch v := i.(type) {
+	case []interface{}:
+		for _, u := range v {
+			val, _ := ToString(u)
+			a = append(a, val)
+		}
+		return a, nil
+	case []string:
+		return v, nil
+	case []int8:
+		for _, u := range v {
+			val, _ := ToString(u)
+			a = append(a, val)
+		}
+		return a, nil
+	case []int:
+		for _, u := range v {
+			val, _ := ToString(u)
+			a = append(a, val)
+		}
+		return a, nil
+	case []int32:
+		for _, u := range v {
+			val, _ := ToString(u)
+			a = append(a, val)
+		}
+		return a, nil
+	case []int64:
+		for _, u := range v {
+			val, _ := ToString(u)
+			a = append(a, val)
+		}
+		return a, nil
+	case []float32:
+		for _, u := range v {
+			val, _ := ToString(u)
+			a = append(a, val)
+		}
+		return a, nil
+	case []float64:
+		for _, u := range v {
+			val, _ := ToString(u)
+			a = append(a, val)
+		}
+		return a, nil
+	case string:
+		return strings.Fields(v), nil
+	case []error:
+		for _, err := range i.([]error) {
+			a = append(a, err.Error())
+		}
+		return a, nil
+	case interface{}:
+		str, err := ToString(v)
+		if err != nil {
+			return a, fmt.Errorf("unable to cast %#v of type %T to []string", i, i)
+		}
+		return []string{str}, nil
+	default:
+		return a, fmt.Errorf("unable to cast %#v of type %T to []string", i, i)
+	}
+}
+
+// ToIntSlice casts an interface to a []int type.
+func ToIntSlice(i interface{}) ([]int, error) {
+	if i == nil {
+		return []int{}, fmt.Errorf("unable to cast %#v of type %T to []int", i, i)
+	}
+
+	switch v := i.(type) {
+	case []int:
+		return v, nil
+	}
+
+	kind := reflect.TypeOf(i).Kind()
+	switch kind {
+	case reflect.Slice, reflect.Array:
+		s := reflect.ValueOf(i)
+		a := make([]int, s.Len())
+		for j := 0; j < s.Len(); j++ {
+			val, err := ToInt(s.Index(j).Interface())
+			if err != nil {
+				return []int{}, fmt.Errorf("unable to cast %#v of type %T to []int", i, i)
+			}
+			a[j] = val
+		}
+		return a, nil
+	default:
+		return []int{}, fmt.Errorf("unable to cast %#v of type %T to []int", i, i)
 	}
 }
 

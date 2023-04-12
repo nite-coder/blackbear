@@ -220,6 +220,44 @@ func Bool(key string, defaultValue ...bool) (bool, error) {
 	return false, fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
 }
 
+// StringSlice returns the value associated with the key as a slice of strings.
+func StringSlice(key string, defaultValue ...[]string) ([]string, error) {
+	for _, p := range cfg.providers {
+		val, err := p.Get(key)
+
+		if err != nil {
+			continue
+		}
+
+		return cast.ToStringSlice(val)
+	}
+
+	if len(defaultValue) > 0 {
+		return defaultValue[0], nil
+	}
+
+	return []string{}, fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
+}
+
+// IntSlice returns the value associated with the key as a slice of int.
+func IntSlice(key string, defaultValue ...[]int) ([]int, error) {
+	for _, p := range cfg.providers {
+		val, err := p.Get(key)
+
+		if err != nil {
+			continue
+		}
+
+		return cast.ToIntSlice(val)
+	}
+
+	if len(defaultValue) > 0 {
+		return defaultValue[0], nil
+	}
+
+	return []int{}, fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
+}
+
 // Bool returns a boolean type value which has the key.
 func Duration(key string, defaultValue ...time.Duration) (time.Duration, error) {
 	for _, p := range cfg.providers {
