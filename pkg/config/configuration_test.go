@@ -37,8 +37,12 @@ datasource:
   - name2
   - name3
 
+metric: [0, 1, 2.5, 25]
 currency: ["btc", "usdt", "usd"]
-users: [1,2,3]
+users:
+  - 1
+  - 2
+  - 3
 
 web:
   port: 10080
@@ -181,6 +185,17 @@ func TestConverterType(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, intSlice, 1)
 	assert.Equal(t, intSlice[0], 100)
+
+	float64Slice, err := config.Float64Slice("metric")
+	assert.NoError(t, err)
+	assert.Len(t, float64Slice, int(4))
+	assert.Equal(t, float64(2.5), float64Slice[2])
+
+	defaultFloat64Slice := []float64{99.87}
+	float64Slice, err = config.Float64Slice("metric1", defaultFloat64Slice)
+	assert.NoError(t, err)
+	assert.Len(t, float64Slice, 1)
+	assert.Equal(t, float64Slice[0], float64(99.87))
 }
 
 func TestScan(t *testing.T) {

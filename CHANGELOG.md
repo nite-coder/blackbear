@@ -2,7 +2,7 @@
 
 ## 2023-04-12
 
-- config: add `IntSlice` and `StringSlice` functions
+- config: add `IntSlice`, `StringSlice`, `Float64Slice` functions
 
 ## 2023-04-08
 

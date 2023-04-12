@@ -258,6 +258,25 @@ func IntSlice(key string, defaultValue ...[]int) ([]int, error) {
 	return []int{}, fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
 }
 
+// Float64Slice returns the value associated with the key as a slice of float.
+func Float64Slice(key string, defaultValue ...[]float64) ([]float64, error) {
+	for _, p := range cfg.providers {
+		val, err := p.Get(key)
+
+		if err != nil {
+			continue
+		}
+
+		return cast.ToFloat64Slice(val)
+	}
+
+	if len(defaultValue) > 0 {
+		return defaultValue[0], nil
+	}
+
+	return []float64{}, fmt.Errorf("%w, key: %s", ErrKeyNotFound, key)
+}
+
 // Bool returns a boolean type value which has the key.
 func Duration(key string, defaultValue ...time.Duration) (time.Duration, error) {
 	for _, p := range cfg.providers {
