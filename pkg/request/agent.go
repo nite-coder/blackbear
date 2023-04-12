@@ -42,17 +42,17 @@ type Agent struct {
 
 	URL     string
 	Method  string
-	Header  map[string]string
+	Headers map[string]string
 	Body    []byte
 	Timeout time.Duration
 }
 
 func newAgentWithClient(client *http.Client) Agent {
 	agent := Agent{
-		client: client,
-		Header: map[string]string{},
+		client:  client,
+		Headers: map[string]string{},
 	}
-	agent.Header["Accept"] = "application/json"
+	agent.Headers["Accept"] = "application/json"
 	agent.Timeout = _timeout
 	return agent
 }
@@ -124,18 +124,18 @@ func (a Agent) DELETE(targetURL string) Agent {
 	return a
 }
 
-// AddHeader that set HTTP header to agent
-func (a Agent) AddHeader(key, val string) Agent {
+// Header that set HTTP header to agent
+func (a Agent) Header(key, val string) Agent {
 	newHeader := map[string]string{}
 
-	if a.Header != nil {
-		for k, val := range a.Header {
+	if a.Headers != nil {
+		for k, val := range a.Headers {
 			newHeader[k] = val
 		}
 	}
 
 	newHeader[key] = val
-	a.Header = newHeader
+	a.Headers = newHeader
 
 	return a
 }
@@ -176,7 +176,7 @@ func (a Agent) SendBytes(bytes []byte) Agent {
 
 // SendJSON send json to target URL
 func (a Agent) SendJSON(v interface{}) Agent {
-	newAgent := a.AddHeader("Content-Type", "application/json")
+	newAgent := a.Header("Content-Type", "application/json")
 	b, err := json.Marshal(v)
 	if err != nil {
 		newAgent.err = err
@@ -186,7 +186,7 @@ func (a Agent) SendJSON(v interface{}) Agent {
 
 // SendXML send json to target URL
 func (a Agent) SendXML(v interface{}) Agent {
-	newAgent := a.AddHeader("Content-Type", "application/xml")
+	newAgent := a.Header("Content-Type", "application/xml")
 	b, err := xml.Marshal(v)
 	if err != nil {
 		newAgent.err = err
@@ -196,7 +196,7 @@ func (a Agent) SendXML(v interface{}) Agent {
 
 // Send send string to target URL
 func (a Agent) Send(body string) Agent {
-	newAgent := a.AddHeader("Content-Type", "application/x-www-form-urlencoded")
+	newAgent := a.Header("Content-Type", "application/x-www-form-urlencoded")
 	return newAgent.SendBytes([]byte(body))
 }
 
@@ -222,7 +222,7 @@ func (a Agent) End() (*Response, error) {
 	}
 
 	// copy Header
-	for k, val := range a.Header {
+	for k, val := range a.Headers {
 		outReq.Header.Add(k, val)
 	}
 

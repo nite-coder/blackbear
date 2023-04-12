@@ -120,8 +120,8 @@ func TestHeader(t *testing.T) {
 	}
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	_, err := POST(ts.URL).
-		AddHeader("Authorization", "abc").
-		AddHeader("User-Agent", "V1.0.0").
+		Header("Authorization", "abc").
+		Header("User-Agent", "V1.0.0").
 		End()
 
 	if err != nil {

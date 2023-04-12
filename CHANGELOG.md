@@ -7,7 +7,7 @@
 ## 2023-04-08
 
 - config: add `StringMap` and `StringMapString` functions
-- [breaking] request: rename `Set` to `AddHeader` function
+- [breaking] request: rename `Set` to `Header` function
 
 ## 2023-03-16
 

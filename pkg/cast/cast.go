@@ -889,12 +889,14 @@ func ToIntSlice(i interface{}) ([]int, error) {
 		return []int{}, fmt.Errorf("unable to cast %#v of type %T to []int", i, i)
 	}
 
+	// nolint:all
 	switch v := i.(type) {
 	case []int:
 		return v, nil
 	}
 
 	kind := reflect.TypeOf(i).Kind()
+	// nolint:all
 	switch kind {
 	case reflect.Slice, reflect.Array:
 		s := reflect.ValueOf(i)
@@ -918,12 +920,14 @@ func ToFloat64Slice(i interface{}) ([]float64, error) {
 		return []float64{}, fmt.Errorf("unable to cast %#v of type %T to []float64", i, i)
 	}
 
+	// nolint:all
 	switch v := i.(type) {
 	case []float64:
 		return v, nil
 	}
 
 	kind := reflect.TypeOf(i).Kind()
+	// nolint:all
 	switch kind {
 	case reflect.Slice, reflect.Array:
 		s := reflect.ValueOf(i)
