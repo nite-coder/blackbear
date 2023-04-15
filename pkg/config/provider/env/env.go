@@ -15,6 +15,11 @@ func New() *EnvProvider {
 	return &EnvProvider{}
 }
 
+// NotifyChange return a channel and notify you when file be changed.
+func (p *EnvProvider) NotifyChange() chan bool {
+	return nil
+}
+
 func (p *EnvProvider) SetEnvPrefix(prefix string) {
 	p.envPrefix = prefix
 }

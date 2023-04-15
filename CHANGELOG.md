@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2023-04-15
+
+- config: redesign `OnChangedEvent` function
+
 ## 2023-04-12
 
 - config: add `IntSlice`, `StringSlice`, `Float64Slice` functions

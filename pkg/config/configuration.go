@@ -18,15 +18,28 @@ var (
 	ErrConfigTypeNotSupport = errors.New("config: type is not support")
 )
 
+type OnChangedEvent func() error
+
 type Configuration struct {
-	providers []Provider
-	rwMutex   sync.RWMutex
+	providers      []Provider
+	rwMutex        sync.RWMutex
+	eventChan      chan bool
+	OnChangedEvent OnChangedEvent
 }
 
 func new() *Configuration {
-	return &Configuration{
+	c := &Configuration{
 		providers: []Provider{},
+		eventChan: make(chan bool, 1),
 	}
+
+	go func() {
+		for range c.eventChan {
+			_ = c.OnChangedEvent()
+		}
+	}()
+
+	return c
 }
 
 func AddProvider(provider Provider) {
@@ -34,6 +47,12 @@ func AddProvider(provider Provider) {
 	defer cfg.rwMutex.Unlock()
 
 	cfg.providers = append(cfg.providers, provider)
+
+	eventChan := cfg.eventChan
+	go func() {
+		evt := <-eventChan
+		cfg.eventChan <- evt
+	}()
 }
 
 func RemoveAllPrividers() {

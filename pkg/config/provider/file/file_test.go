@@ -144,14 +144,10 @@ func TestWatchConfig(t *testing.T) {
 	fileProvder := New()
 	fileProvder.AddPath(tmpDir)
 	fileProvder.SetConfigName(filepath.Base(tmpFile.Name()))
-	err = fileProvder.WatchConfig()
+	err = fileProvder.Load()
 	require.NoError(t, err)
 
-	fileProvder.OnChangedEvent = func(oldContent string, newContent string) {
-
-	}
-
-	err = fileProvder.Load()
+	err = fileProvder.WatchConfig()
 	require.NoError(t, err)
 
 	val, err := fileProvder.Get("env")

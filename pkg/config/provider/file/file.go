@@ -21,8 +21,6 @@ import (
 
 type ConfigType string
 
-type OnChangedEvent func(oldContent string, newContent string)
-
 const (
 	ConfigTypeYAML ConfigType = "yaml"
 	ConfigTypeJSON ConfigType = "json"
@@ -38,7 +36,7 @@ type FileProvider struct {
 	paths             []string
 	cache             map[string]interface{}
 	lastFileUpdatedAt time.Time
-	OnChangedEvent    OnChangedEvent
+	eventChan         chan bool
 }
 
 func New() *FileProvider {
@@ -50,9 +48,13 @@ func New() *FileProvider {
 	}
 }
 
-// Content return config content.
 func (p *FileProvider) Content() string {
 	return string(p.content)
+}
+
+// NotifyChange return a channel and notify you when file be changed.
+func (p *FileProvider) NotifyChange() chan bool {
+	return nil
 }
 
 // ConfigName return config file name.  The default config file name is "app.yml"
@@ -270,8 +272,8 @@ func (p *FileProvider) WatchConfig() error {
 		return err
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(1)
+	sw := sync.WaitGroup{}
+	sw.Add(1)
 
 	go func() {
 		watcher, err := fsnotify.NewWatcher()
@@ -280,61 +282,51 @@ func (p *FileProvider) WatchConfig() error {
 		}
 		defer watcher.Close()
 
-		done := make(chan bool)
-		go func() {
-			isUpdate := false
-
-			for {
-
-				timer := time.NewTimer(2 * time.Second)
-
-				select {
-				case event, ok := <-watcher.Events:
-					if !ok {
-						return
-					}
-					log.Println("event:", event)
-					if event.Op&fsnotify.Write == fsnotify.Write ||
-						event.Op&fsnotify.Rename == fsnotify.Rename {
-						isUpdate = true
-						log.Println("modified file:", event.Name)
-					}
-				case err, ok := <-watcher.Errors:
-					if !ok {
-						return
-					}
-					log.Println("error:", err)
-				case <-timer.C:
-					if !isUpdate {
-						continue
-					}
-					isUpdate = false
-					old := string(p.content)
-					err := p.Load()
-					if err != nil {
-						log.Println("error:", err)
-						continue
-					}
-
-					if p.OnChangedEvent != nil {
-						new := string(p.content)
-						p.OnChangedEvent(old, new)
-					}
-				}
-
-				timer.Stop()
-			}
-		}()
-
 		err = watcher.Add(configPath)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		wg.Done()
-		<-done
+		sw.Done()
+		isUpdate := false
+		ticker := time.NewTicker(2 * time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				if !ok {
+					return
+				}
+				log.Println("event:", event)
+				if event.Op&fsnotify.Write == fsnotify.Write ||
+					event.Op&fsnotify.Create == fsnotify.Create {
+					isUpdate = true
+					log.Println("modified file:", event.Name)
+				}
+
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					return
+				}
+				log.Println("error:", err)
+			case <-ticker.C:
+				if !isUpdate {
+					continue
+				}
+				isUpdate = false
+
+				err := p.Load()
+				if err != nil {
+					log.Println("error:", err)
+					continue
+				}
+
+				p.eventChan <- true
+			}
+		}
 	}()
 
-	wg.Wait()
+	sw.Wait()
 	return nil
 }
