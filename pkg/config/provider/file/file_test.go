@@ -150,7 +150,18 @@ func TestWatchConfig(t *testing.T) {
 	err = fileProvder.WatchConfig()
 	require.NoError(t, err)
 
-	val, err := fileProvder.Get("env")
+	config.AddProvider(fileProvder)
+
+	isFire := false
+	config.OnChangedEvent(func() error {
+		isFire = true
+		val, err := config.String("env")
+		require.NoError(t, err)
+		require.Equal(t, "test1", val)
+		return nil
+	})
+
+	val, err := config.String("env")
 	require.NoError(t, err)
 	require.Equal(t, "test", val)
 
@@ -165,7 +176,5 @@ func TestWatchConfig(t *testing.T) {
 
 	time.Sleep(3 * time.Second) // wait for onChangedEvent fired
 
-	val, err = fileProvder.Get("env")
-	require.NoError(t, err)
-	require.Equal(t, "test1", val)
+	assert.True(t, isFire)
 }

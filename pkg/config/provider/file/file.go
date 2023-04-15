@@ -45,6 +45,7 @@ func New() *FileProvider {
 		configName: "app.yml",
 		configType: ConfigTypeYAML,
 		cache:      map[string]interface{}{},
+		eventChan:  make(chan bool, 1),
 	}
 }
 
@@ -54,7 +55,7 @@ func (p *FileProvider) Content() string {
 
 // NotifyChange return a channel and notify you when file be changed.
 func (p *FileProvider) NotifyChange() chan bool {
-	return nil
+	return p.eventChan
 }
 
 // ConfigName return config file name.  The default config file name is "app.yml"
