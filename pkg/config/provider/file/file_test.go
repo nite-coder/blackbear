@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -152,9 +153,9 @@ func TestWatchConfig(t *testing.T) {
 
 	config.AddProvider(fileProvder)
 
-	isFire := false
+	var count int64
 	config.OnChangedEvent(func() error {
-		isFire = true
+		atomic.AddInt64(&count, int64(1))
 		val, err := config.String("env")
 		require.NoError(t, err)
 		require.Equal(t, "test1", val)
@@ -176,5 +177,5 @@ func TestWatchConfig(t *testing.T) {
 
 	time.Sleep(3 * time.Second) // wait for onChangedEvent fired
 
-	assert.True(t, isFire)
+	assert.Equal(t, int64(1), atomic.LoadInt64(&count))
 }

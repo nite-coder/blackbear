@@ -301,9 +301,18 @@ func (p *FileProvider) WatchConfig() error {
 				}
 				log.Println("event:", event)
 				if event.Op&fsnotify.Write == fsnotify.Write ||
-					event.Op&fsnotify.Create == fsnotify.Create {
+					event.Op&fsnotify.Create == fsnotify.Create ||
+					event.Op&fsnotify.Rename == fsnotify.Rename {
 					isUpdate = true
 					log.Println("modified file:", event.Name)
+				} else if event.Op&fsnotify.Remove == fsnotify.Remove {
+					if fileExist(configPath) {
+						log.Printf("reread  file:%s ", configPath)
+						err := watcher.Add(configPath)
+						if err != nil {
+							log.Println("error:", err)
+						}
+					}
 				}
 
 			case err, ok := <-watcher.Errors:
@@ -311,6 +320,7 @@ func (p *FileProvider) WatchConfig() error {
 					return
 				}
 				log.Println("error:", err)
+
 			case <-ticker.C:
 				if !isUpdate {
 					continue
@@ -330,4 +340,18 @@ func (p *FileProvider) WatchConfig() error {
 
 	sw.Wait()
 	return nil
+}
+
+func fileExist(file string) bool {
+	_, err := os.Stat(file)
+	if err != nil {
+		if os.IsExist(err) {
+			return true
+		}
+		if os.IsNotExist(err) {
+			return false
+		}
+		return false
+	}
+	return true
 }
