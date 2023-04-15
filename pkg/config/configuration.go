@@ -21,29 +21,21 @@ var (
 type ChangedEvent func() error
 
 type Configuration struct {
-	providers      []Provider
-	rwMutex        sync.RWMutex
-	eventChan      chan bool
-	OnChangedEvent ChangedEvent
+	providers    []Provider
+	rwMutex      sync.RWMutex
+	changedEvent ChangedEvent
 }
 
 func new() *Configuration {
 	c := &Configuration{
 		providers: []Provider{},
-		eventChan: make(chan bool, 1),
 	}
-
-	go func() {
-		for range c.eventChan {
-			_ = c.OnChangedEvent()
-		}
-	}()
 
 	return c
 }
 
 func OnChangedEvent(event ChangedEvent) {
-	cfg.OnChangedEvent = event
+	cfg.changedEvent = event
 }
 
 func AddProvider(provider Provider) {
@@ -52,10 +44,12 @@ func AddProvider(provider Provider) {
 
 	cfg.providers = append(cfg.providers, provider)
 
-	eventChan := cfg.eventChan
 	go func() {
-		evt := <-eventChan
-		cfg.eventChan <- evt
+		for range provider.NotifyChange() {
+			if cfg.changedEvent != nil {
+				_ = cfg.changedEvent()
+			}
+		}
 	}()
 }
 
