@@ -299,18 +299,21 @@ func (p *FileProvider) WatchConfig() error {
 				if !ok {
 					return
 				}
-				log.Println("event:", event)
+				log.Println("watcher event:", event)
+				// 1. The Write, Create, and Rename events will be fired when saving the data, depending on the text editor you are using. For example, vi uses Rename
+				// 2. When a large amount of data is being saved, the Write event will be triggered multiple times. Hence, we utilize a ticker and the 'isUpdate' parameter here.
 				if event.Op&fsnotify.Write == fsnotify.Write ||
 					event.Op&fsnotify.Create == fsnotify.Create ||
 					event.Op&fsnotify.Rename == fsnotify.Rename {
 					isUpdate = true
 					log.Println("modified file:", event.Name)
 				} else if event.Op&fsnotify.Remove == fsnotify.Remove {
+					// Some editors will remove the path from the watch list when the event is triggered, so we need to re-add it
 					if fileExist(configPath) {
 						log.Printf("reread  file:%s ", configPath)
 						err := watcher.Add(configPath)
 						if err != nil {
-							log.Println("error:", err)
+							log.Println("watcher error:", err)
 						}
 					}
 				}
@@ -319,7 +322,7 @@ func (p *FileProvider) WatchConfig() error {
 				if !ok {
 					return
 				}
-				log.Println("error:", err)
+				log.Println("watcher error:", err)
 
 			case <-ticker.C:
 				if !isUpdate {
@@ -329,7 +332,7 @@ func (p *FileProvider) WatchConfig() error {
 
 				err := p.Load()
 				if err != nil {
-					log.Println("error:", err)
+					log.Println("watcher error:", err)
 					continue
 				}
 
