@@ -11,7 +11,7 @@ func Test(t *testing.T) {
 	defer b.Free()
 	b.WriteString("hello")
 	b.WriteByte(',')
-	b.Write([]byte(" world"))
+	_, _ = b.Write([]byte(" world"))
 	b.WritePosIntWidth(17, 4)
 
 	got := b.String()

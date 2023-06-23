@@ -18,9 +18,7 @@ var enc = json.Encoder{}
 
 func init() {
 	// using closure to reflect the changes at runtime.
-	json.JSONMarshalFunc = func(v interface{}) ([]byte, error) {
-		return stdJSON.Marshal(v)
-	}
+	json.JSONMarshalFunc = stdJSON.Marshal
 }
 
 // Handler is an interface that log handlers need to be implemented

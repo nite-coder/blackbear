@@ -76,7 +76,7 @@ func (b *Buffer) WritePosIntWidth(i, width int) {
 	}
 	// i < 10
 	bb[bp] = byte('0' + i)
-	b.Write(bb[bp:])
+	_, _ = b.Write(bb[bp:])
 }
 
 func (b *Buffer) String() string {
