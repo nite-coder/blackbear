@@ -7,9 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nite-coder/blackbear/internal/buffer"
 	"github.com/nite-coder/blackbear/pkg/log"
-	"github.com/nite-coder/blackbear/pkg/log/handler/discard"
-	"github.com/nite-coder/blackbear/pkg/log/handler/memory"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,88 +17,95 @@ type Person struct {
 	Age  int
 }
 
+// type ErrHandler struct {
+// }
+
+// func (h *ErrHandler) BeforeWriting(e *log.Entry) error {
+// 	return nil
+// }
+
+// func (h *ErrHandler) Write(bytes []byte) error {
+// 	return errors.New("oops")
+// }
+
+// func TestErrorHandler(t *testing.T) {
+// 	logger := log.New()
+
+// 	h1 := &ErrHandler{}
+// 	logger.AddHandler(h1, log.AllLevels...)
+
+// 	log.SetLogger(logger)
+
+// 	isErr := false
+// 	log.ErrorHandler = func(err error) {
+// 		isErr = true
+// 	}
+
+// 	log.Debug("aaa")
+// 	assert.Equal(t, true, isErr)
+// }
+
 func TestNoHandler(t *testing.T) {
-	log.Info("no handler 1")
-	log.Warnf("no handler 2")
+	log.Info().Msg("no handler 1")
+	log.InfoCtx(context.Background()).Msg("no handler 2")
 }
 
-func TestAddHandlers(t *testing.T) {
-	logger := log.New()
+func TestDisableLevel(t *testing.T) {
+	b := buffer.New()
+	defer b.Free()
 
-	h1 := memory.New()
-	logger.AddHandler(h1, log.AllLevels...)
-
-	h2 := memory.New()
-	logger.AddHandler(h2, log.AllLevels...)
-
-	log.SetLogger(logger)
-
-	log.Info("info")
-	assert.Equal(t, `{"level":"INFO","msg":"info"}`+"\n", string(h1.Out))
-	assert.Equal(t, `{"level":"INFO","msg":"info"}`+"\n", string(h2.Out))
-}
-
-type ErrHandler struct {
-}
-
-func (h *ErrHandler) BeforeWriting(e *log.Entry) error {
-	return nil
-}
-
-func (h *ErrHandler) Write(bytes []byte) error {
-	return errors.New("oops")
-}
-
-func TestErrorHandler(t *testing.T) {
-	logger := log.New()
-
-	h1 := &ErrHandler{}
-	logger.AddHandler(h1, log.AllLevels...)
-
-	log.SetLogger(logger)
-
-	isErr := false
-	log.ErrorHandler = func(err error) {
-		isErr = true
+	opts := log.HandlerOptions{
+		Level:       log.InfoLevel,
+		DisableTime: true,
 	}
+	log.SetDefault(log.New(log.NewJSONHandler(b, &opts)))
 
-	log.Debug("aaa")
-	assert.Equal(t, true, isErr)
+	log.Debug().Msg("no handler 1")
+	assert.Equal(t, "", b.String())
+	b.Reset()
 }
 
 func TestLog(t *testing.T) {
-	logger := log.New()
+	b := buffer.New()
+	defer b.Free()
 
-	h := memory.New()
-	logger.AddHandler(h, log.AllLevels...)
+	opts := log.HandlerOptions{
+		Level:       log.DebugLevel,
+		DisableTime: true,
+	}
+	log.SetDefault(log.New(log.NewJSONHandler(b, &opts)))
 
-	log.SetLogger(logger)
+	log.Debug().Msg("debug")
+	assert.Equal(t, `{"level":"DEBUG","msg":"debug"}`+"\n", b.String())
+	b.Reset()
 
-	log.AutoStaceTrace = false
+	log.Debug().Msgf("debug %s", "hello")
+	assert.Equal(t, `{"level":"DEBUG","msg":"debug hello"}`+"\n", b.String())
+	b.Reset()
 
-	log.Debug("debug")
-	assert.Equal(t, `{"level":"DEBUG","msg":"debug"}`+"\n", string(h.Out))
+	log.Info().Msg("info")
+	assert.Equal(t, `{"level":"INFO","msg":"info"}`+"\n", b.String())
+	b.Reset()
 
-	log.Debugf("debug %s", "hello")
-	assert.Equal(t, `{"level":"DEBUG","msg":"debug hello"}`+"\n", string(h.Out))
+	log.Info().Msgf("info %s", "hello")
+	assert.Equal(t, `{"level":"INFO","msg":"info hello"}`+"\n", b.String())
+	b.Reset()
 
-	log.Info("info")
-	assert.Equal(t, `{"level":"INFO","msg":"info"}`+"\n", string(h.Out))
+	log.Warn().Msg("warn")
+	assert.Equal(t, `{"level":"WARN","msg":"warn"}`+"\n", b.String())
+	b.Reset()
 
-	log.Infof("info %s", "hello")
-	assert.Equal(t, `{"level":"INFO","msg":"info hello"}`+"\n", string(h.Out))
+	log.Warn().Msgf("warn %s", "hello")
+	assert.Equal(t, `{"level":"WARN","msg":"warn hello"}`+"\n", b.String())
+	b.Reset()
 
-	log.Warn("warn")
-	assert.Equal(t, `{"level":"WARN","msg":"warn"}`+"\n", string(h.Out))
+	log.Error().Msg("error")
+	assert.Equal(t, `{"level":"ERROR","msg":"error"}`+"\n", b.String())
+	b.Reset()
 
-	log.Warnf("warn %s", "hello")
-	assert.Equal(t, `{"level":"WARN","msg":"warn hello"}`+"\n", string(h.Out))
-
-	log.Error("error")
-	assert.Equal(t, `{"level":"ERROR","msg":"error"}`+"\n", string(h.Out))
-
-	log.Errorf("error %s", "hello")
-	assert.Equal(t, `{"level":"ERROR","msg":"error hello"}`+"\n", string(h.Out))
+	log.Error().Msgf("error %s", "hello")
+	assert.Equal(t, `{"level":"ERROR","msg":"error hello"}`+"\n", b.String())
+	b.Reset()
 
 	t.Run("test panic", func(t *testing.T) {
 		defer func() {
@@ -109,11 +115,12 @@ func TestLog(t *testing.T) {
 					assert.Equal(t, "panic", err.Error())
 				}
 			}
-			assert.Equal(t, `{"level":"PANIC","msg":"panic"}`+"\n", string(h.Out))
+			assert.Equal(t, `{"level":"PANIC","msg":"panic"}`+"\n", b.String())
 		}()
-		log.Panic("panic")
+		log.Panic().Msg("panic")
 	})
 
+	b.Reset()
 	t.Run("test panicf", func(t *testing.T) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -122,148 +129,29 @@ func TestLog(t *testing.T) {
 					assert.Equal(t, "panic hello", err.Error())
 				}
 			}
-			assert.Equal(t, `{"level":"PANIC","msg":"panic hello"}`+"\n", string(h.Out))
+			assert.Equal(t, `{"level":"PANIC","msg":"panic hello"}`+"\n", b.String())
 		}()
-		log.Panicf("panic %s", "hello")
-	})
-
-	log.AutoStaceTrace = true
-}
-
-func TestContext(t *testing.T) {
-	logger := log.New()
-
-	h := memory.New()
-	logger.AddHandler(h, log.AllLevels...)
-	log.SetLogger(logger)
-
-	c := log.Str("app", "stant")
-
-	c.Str("a", "b").Info("hello world")
-	assert.Equal(t, `{"app":"stant","a":"b","level":"INFO","msg":"hello world"}`+"\n", string(h.Out))
-
-	c.Bool("bool", true).Info("hello world")
-	assert.Equal(t, `{"app":"stant","bool":true,"level":"INFO","msg":"hello world"}`+"\n", string(h.Out))
-
-	log.Int("int", 1).Info("info")
-	assert.Equal(t, `{"int":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
-
-	log.Int8("int8", 1).Info("info")
-	assert.Equal(t, `{"int8":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
-
-	log.Int16("int16", 1).Info("info")
-	assert.Equal(t, `{"int16":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
-
-	log.Int32("int32", 1).Info("info")
-	assert.Equal(t, `{"int32":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
-
-	log.Int64("int64", 1).Info("info")
-	assert.Equal(t, `{"int64":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
-
-	log.Uint("uint", 1).Info("info")
-	assert.Equal(t, `{"uint":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
-
-	log.Uint8("uint8", 1).Info("info")
-	assert.Equal(t, `{"uint8":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
-
-	log.Uint16("uint16", 1).Info("info")
-	assert.Equal(t, `{"uint16":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
-
-	log.Uint32("uint32", 1).Info("info")
-	assert.Equal(t, `{"uint32":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
-
-	log.Uint64("uint64", 1).Info("info")
-	assert.Equal(t, `{"uint64":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
-
-	log.Float32("float32", 1).Info("info")
-	assert.Equal(t, `{"float32":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
-
-	log.Float64("float64", 1).Info("info")
-	assert.Equal(t, `{"float64":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
-
-	log.Any("person", Person{Name: "Alice", Age: 26}).Info("info")
-	assert.Equal(t, `{"person":{"Name":"Alice","Age":26},"level":"INFO","msg":"info"}`+"\n", string(h.Out))
-}
-
-func TestFlush(t *testing.T) {
-	logger := log.New()
-
-	h := memory.New()
-	logger.AddHandler(h, log.GetLevelsFromMinLevel("debug")...)
-
-	log.SetLogger(logger)
-
-	log.Debug("flush")
-	log.Flush()
-	assert.Equal(t, 0, len(h.Out))
-}
-
-func TestLevels(t *testing.T) {
-	levels := log.GetLevelsFromMinLevel("debug")
-	assert.Equal(t, log.AllLevels, levels)
-
-	levels = log.GetLevelsFromMinLevel("")
-	assert.Equal(t, log.AllLevels, levels)
-
-	levels = log.GetLevelsFromMinLevel("info")
-	assert.Equal(t, []log.Level{log.InfoLevel, log.WarnLevel, log.ErrorLevel, log.PanicLevel, log.FatalLevel}, levels)
-
-	levels = log.GetLevelsFromMinLevel("warn")
-	assert.Equal(t, []log.Level{log.WarnLevel, log.ErrorLevel, log.PanicLevel, log.FatalLevel}, levels)
-
-	levels = log.GetLevelsFromMinLevel("error")
-	assert.Equal(t, []log.Level{log.ErrorLevel, log.PanicLevel, log.FatalLevel}, levels)
-
-	levels = log.GetLevelsFromMinLevel("panic")
-	assert.Equal(t, []log.Level{log.PanicLevel, log.FatalLevel}, levels)
-
-	levels = log.GetLevelsFromMinLevel("fatal")
-	assert.Equal(t, []log.Level{log.FatalLevel}, levels)
-}
-
-func TestStdContext(t *testing.T) {
-	logger := log.New()
-
-	h := memory.New()
-	logger.AddHandler(h, log.AllLevels...)
-
-	log.SetLogger(logger)
-
-	t.Run("create new context", func(t *testing.T) {
-		ctx := context.Background()
-		ctx = log.Str("request_id", "abc").WithContext(ctx)
-
-		logger := log.FromContext(ctx)
-		logger.Debug("test")
-		assert.Equal(t, `{"request_id":"abc","level":"DEBUG","msg":"test"}`+"\n", string(h.Out))
-
-		logger.Str("app", "santa").Debugf("debug %s", "hello")
-		assert.Equal(t, `{"request_id":"abc","app":"santa","level":"DEBUG","msg":"debug hello"}`+"\n", string(h.Out))
-	})
-
-	t.Run("create blank context", func(t *testing.T) {
-		ctx := context.Background()
-		logger := log.FromContext(ctx)
-		logger.Info("test")
-		assert.Equal(t, `{"level":"INFO","msg":"test"}`+"\n", string(h.Out))
+		log.Panic().Msgf("panic %s", "hello")
 	})
 }
 
-func TestStandardFields(t *testing.T) {
-	logger := log.New()
+func TestFields(t *testing.T) {
+	b := buffer.New()
+	defer b.Free()
 
-	h := memory.New()
-	logger.AddHandler(h, log.GetLevelsFromMinLevel("debug")...)
-
-	log.SetLogger(logger)
+	opts := log.HandlerOptions{
+		Level:       log.DebugLevel,
+		DisableTime: true,
+	}
+	log.SetDefault(log.New(log.NewJSONHandler(b, &opts)))
 
 	time1, _ := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 	time2, _ := time.Parse(time.RFC3339, "2012-11-01T22:08:41+08:00")
 
-	logger = log.
-		Str("hello", "world").
+	logger := log.With().
+		Str("string", "hello").
 		Strs("strs", []string{"str1", "str2"}).
-		Bool("is_enabled", true).
+		Bool("bool", true).
 		Int("int", 1).
 		Int8("int8", int8(2)).
 		Int16("int16", int16(3)).
@@ -278,140 +166,137 @@ func TestStandardFields(t *testing.T) {
 		Float64("float64", float64(12.123)).
 		Time("time", time1).
 		Times("times", []time.Time{time1, time2}).
-		Any("person", Person{}).Logger()
+		Any("person", Person{Name: "Doge", Age: 18}).
+		Logger()
 
-	logger.Debug("debug")
+	logger.Info().Msg("test field")
+	assert.Equal(t, `{"level":"INFO","msg":"test field","string":"hello","strs":["str1","str2"],"bool":true,"int":1,"int8":2,"int16":3,"int32":4,"int64":5,"uint":6,"uint8":7,"uint16":8,"uint32":9,"uint64":10,"float32":11.123,"float64":12.123,"time":"2012-11-01T22:08:41Z","times":["2012-11-01T22:08:41Z","2012-11-01T22:08:41+08:00"],"person":{"Name":"Doge","Age":18}}`+"\n", b.String())
+	b.Reset()
 
-	// t.Log(string(h.Out))
-	assert.Equal(t, `{"hello":"world","strs":["str1","str2"],"is_enabled":true,"int":1,"int8":2,"int16":3,"int32":4,"int64":5,"uint":6,"uint8":7,"uint16":8,"uint32":9,"uint64":10,"float32":11.123,"float64":12.123,"time":"2012-11-01T22:08:41Z","times":["2012-11-01T22:08:41Z","2012-11-01T22:08:41+08:00"],"person":{"Name":"","Age":0},"level":"DEBUG","msg":"debug"}`+"\n", string(h.Out))
+	log.Debug().
+		Str("string", "hello").
+		Strs("strs", []string{"str1", "str2"}).
+		Bool("bool", true).
+		Int("int", 1).
+		Int8("int8", int8(2)).
+		Int16("int16", int16(3)).
+		Int32("int32", int32(4)).
+		Int64("int64", int64(5)).
+		Uint("uint", uint(6)).
+		Uint8("uint8", uint8(7)).
+		Uint16("uint16", uint16(8)).
+		Uint32("uint32", uint32(9)).
+		Uint64("uint64", uint64(10)).
+		Float32("float32", float32(11.123)).
+		Float64("float64", float64(12.123)).
+		Time("time", time1).
+		Times("times", []time.Time{time1, time2}).
+		Any("person", Person{Name: "Doge", Age: 18}).
+		Msg("test field")
+
+	assert.Equal(t, `{"level":"DEBUG","msg":"test field","string":"hello","strs":["str1","str2"],"bool":true,"int":1,"int8":2,"int16":3,"int32":4,"int64":5,"uint":6,"uint8":7,"uint16":8,"uint32":9,"uint64":10,"float32":11.123,"float64":12.123,"time":"2012-11-01T22:08:41Z","times":["2012-11-01T22:08:41Z","2012-11-01T22:08:41+08:00"],"person":{"Name":"Doge","Age":18}}`+"\n", b.String())
+}
+
+func TestFlush(t *testing.T) {
+	b := buffer.New()
+	defer b.Free()
+
+	opts := log.HandlerOptions{
+		Level:       log.DebugLevel,
+		DisableTime: true,
+	}
+	log.SetDefault(log.New(log.NewJSONHandler(b, &opts)))
+
+	log.Debug().Msg("flush")
+	log.Flush()
+}
+
+func TestStdContext(t *testing.T) {
+	b := buffer.New()
+	defer b.Free()
+
+	opts := log.HandlerOptions{
+		Level:       log.DebugLevel,
+		DisableTime: true,
+	}
+	log.SetDefault(log.New(log.NewJSONHandler(b, &opts)))
+
+	t.Run("create new context", func(t *testing.T) {
+		ctx := context.Background()
+		ctx = log.With().Str("request_id", "abc").Logger().WithContext(ctx)
+
+		logger := log.FromContext(ctx)
+		logger.Debug().Msg("debug")
+		assert.Equal(t, `{"level":"DEBUG","msg":"debug","request_id":"abc"}`+"\n", b.String())
+		b.Reset()
+
+		logger.Debug().Str("app", "santa").Msgf("debug %s", "hello")
+		assert.Equal(t, `{"level":"DEBUG","msg":"debug hello","request_id":"abc","app":"santa"}`+"\n", b.String())
+		b.Reset()
+	})
+
+	t.Run("create from background context", func(t *testing.T) {
+		ctx := context.Background()
+		logger := log.FromContext(ctx)
+		logger.Info().Msg("test")
+		assert.Equal(t, `{"level":"INFO","msg":"test"}`+"\n", b.String())
+	})
 }
 
 func TestAdvancedFields(t *testing.T) {
-	logger := log.New()
+	b := buffer.New()
+	defer b.Free()
 
-	h := memory.New()
-	logger.AddHandler(h, log.AllLevels...)
-
-	log.SetLogger(logger)
-
-	log.AutoStaceTrace = false
+	opts := log.HandlerOptions{
+		Level:       log.DebugLevel,
+		DisableTime: true,
+	}
+	log.SetDefault(log.New(log.NewJSONHandler(b, &opts)))
 
 	err := errors.New("something bad happened")
-	log.Err(err).Error("too bad")
+	log.Error().Err(err).Msg("too bad")
 
-	assert.Equal(t, `{"error":"something bad happened","level":"ERROR","msg":"too bad"}`+"\n", string(h.Out))
-
-	log.AutoStaceTrace = true
-}
-
-// func TestTrace(t *testing.T) {
-// 	h := memory.New()
-// 	log.AddHandler(h, log.AllLevels...)
-
-// 	func() (err error) {
-// 		defer log.Trace("trace").Stop()
-// 		return nil
-// 	}()
-// 	assert.Equal(t, `{"duration":0,"level":"INFO","msg":"trace"}`+"\n", string(h.Out))
-// }
-
-type AppHook struct {
-}
-
-func (h *AppHook) Hook(e *log.Entry) error {
-	e.Str("app_id", "santa").Str("env", "dev")
-	return nil
-}
-
-func TestHook(t *testing.T) {
-	logger := log.New()
-
-	h := memory.New()
-	logger.AddHandler(h, log.AllLevels...)
-
-	_ = logger.AddHook(func(e *log.Entry) error {
-		e.Str("app_id", "santa").Str("env", "dev")
-		return nil
-	})
-
-	log.SetLogger(logger)
-
-	log.Info("upload complete")
-
-	assert.Equal(t, `{"app_id":"santa","env":"dev","level":"INFO","msg":"upload complete"}`+"\n", string(h.Out))
+	assert.Equal(t, `{"level":"ERROR","msg":"too bad","error":"something bad happened"}`+"\n", b.String())
 }
 
 func TestGoroutineSafe(t *testing.T) {
-	logger := log.New()
+	b := buffer.New()
+	defer b.Free()
 
-	h := memory.New()
-	logger.AddHandler(h, log.AllLevels...)
+	opts := log.HandlerOptions{
+		Level:       log.DebugLevel,
+		DisableTime: true,
+	}
+	log.SetDefault(log.New(log.NewJSONHandler(b, &opts)))
 
-	log.SetLogger(logger)
-
-	logger = log.Str("request_id", "abc").Logger()
+	logger := log.With().Str("request_id", "abc").Logger()
 
 	var wg sync.WaitGroup
-
 	wg.Add(3)
 
 	go func() {
 		defer wg.Done()
-		_ = logger.Str("name", "abc")
-		logger.Info("test")
+		logger.Info().Str("name", "abc").Msg("test")
 	}()
 
 	go func() {
 		defer wg.Done()
-		_ = logger.Str("name", "xyz")
-		logger.Info("test")
+		logger.Info().Str("name", "xyz").Msg("test")
 	}()
 
 	go func() {
 		defer wg.Done()
-		logger := log.New()
-		log.SetLogger(logger)
-		log.Info("test")
+
+		b1 := buffer.New()
+		defer b1.Free()
+
+		opts := log.HandlerOptions{
+			Level:       log.DebugLevel,
+			DisableTime: true,
+		}
+		log.SetDefault(log.New(log.NewJSONHandler(b1, &opts)))
+		log.Info().Msg("test")
 	}()
 
 	wg.Wait()
-}
-
-func TestSaveToDefaultContext(t *testing.T) {
-	logger := log.New()
-	logger = logger.
-		Str("app", "santa").
-		Str("env", "dev").Logger()
-
-	h := memory.New()
-	logger.AddHandler(h, log.AllLevels...)
-
-	log.SetLogger(logger)
-
-	log.Debug("hello")
-	assert.Equal(t, `{"app":"santa","env":"dev","level":"DEBUG","msg":"hello"}`+"\n", string(h.Out))
-
-	log.Bool("answer", true).SaveToDefault()
-	log.Int32("count", 3).Info("hello2")
-
-	// t.Log(string(h.Out))
-	assert.Equal(t, `{"app":"santa","env":"dev","answer":true,"count":3,"level":"INFO","msg":"hello2"}`+"\n", string(h.Out))
-}
-
-func BenchmarkDisabledAddingFields(b *testing.B) {
-	b.Logf("Logging without any structured context.")
-
-	b.Run("jasnosoft/log", func(b *testing.B) {
-		logger := log.New()
-		h := discard.New()
-		logger.AddHandler(h, log.InfoLevel)
-		log.SetLogger(logger)
-
-		b.ResetTimer()
-		b.RunParallel(func(pb *testing.PB) {
-			for pb.Next() {
-				log.Info("hello world")
-			}
-		})
-	})
 }

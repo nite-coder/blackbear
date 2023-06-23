@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2023-06-23
+
+- log: redesign log package v3
+
 ## 2023-04-15
 
 - config: redesign `OnChangedEvent` function

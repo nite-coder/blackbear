@@ -16,17 +16,6 @@ const (
 	TraceLevel
 )
 
-// AllLevels is an array of all log levels, for easier registering of all levels to a handler
-var AllLevels = []Level{
-	DebugLevel,
-	InfoLevel,
-	WarnLevel,
-	ErrorLevel,
-	PanicLevel,
-	FatalLevel,
-	TraceLevel,
-}
-
 var levelNames = []string{
 	"DEBUG",
 	"INFO",
@@ -42,43 +31,23 @@ func (p Level) String() string {
 	return levelNames[p]
 }
 
-// GetLevelsFromMinLevel returns Levels array which above minLevel
-func GetLevelsFromMinLevel(minLevel string) []Level {
-	minLevel = strings.ToLower(minLevel)
-	switch minLevel {
+// NewLevel returns Level struct
+func NewLevel(level string) Level {
+	level = strings.ToLower(level)
+	switch level {
 	case "debug":
-		return AllLevels
+		return DebugLevel
 	case "info":
-		return []Level{
-			InfoLevel,
-			WarnLevel,
-			ErrorLevel,
-			PanicLevel,
-			FatalLevel,
-		}
+		return InfoLevel
 	case "warn":
-		return []Level{
-			WarnLevel,
-			ErrorLevel,
-			PanicLevel,
-			FatalLevel,
-		}
+		return WarnLevel
 	case "error":
-		return []Level{
-			ErrorLevel,
-			PanicLevel,
-			FatalLevel,
-		}
+		return ErrorLevel
 	case "panic":
-		return []Level{
-			PanicLevel,
-			FatalLevel,
-		}
+		return PanicLevel
 	case "fatal":
-		return []Level{
-			FatalLevel,
-		}
+		return FatalLevel
 	default:
-		return AllLevels
+		return DebugLevel
 	}
 }
