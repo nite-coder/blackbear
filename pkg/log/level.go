@@ -1,5 +1,7 @@
 package log
 
+import "strings"
+
 // Level of the log
 type Level uint8
 
@@ -14,17 +16,6 @@ const (
 	TraceLevel
 )
 
-// AllLevels is an array of all log levels, for easier registering of all levels to a handler
-var AllLevels = []Level{
-	DebugLevel,
-	InfoLevel,
-	WarnLevel,
-	ErrorLevel,
-	PanicLevel,
-	FatalLevel,
-	TraceLevel,
-}
-
 var levelNames = []string{
 	"DEBUG",
 	"INFO",
@@ -38,4 +29,25 @@ var levelNames = []string{
 // String returns the string representation of a logging level.
 func (p Level) String() string {
 	return levelNames[p]
+}
+
+// NewLevel returns Level struct
+func NewLevel(level string) Level {
+	level = strings.ToLower(level)
+	switch level {
+	case "debug":
+		return DebugLevel
+	case "info":
+		return InfoLevel
+	case "warn":
+		return WarnLevel
+	case "error":
+		return ErrorLevel
+	case "panic":
+		return PanicLevel
+	case "fatal":
+		return FatalLevel
+	default:
+		return DebugLevel
+	}
 }

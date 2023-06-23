@@ -86,7 +86,8 @@ func (h *Handler) Handle(_ context.Context, e *log.Entry) error {
 	defer h.mu.Unlock()
 
 	if h.opts.DisableTime {
-		_, _ = fmt.Fprintf(h.writer, "%s %s %s", timeColor.Sprint(time.Now()), levelColor.Sprintf("%-6s", level), e.Message)
+		time := time.Now().Format("03:04:05.000")
+		_, _ = fmt.Fprintf(h.writer, "%s %s %s", timeColor.Sprint(time), levelColor.Sprintf("%-6s", level), e.Message)
 	} else {
 		_, _ = fmt.Fprintf(h.writer, "%s %s", levelColor.Sprintf("%-6s", level), e.Message)
 	}
