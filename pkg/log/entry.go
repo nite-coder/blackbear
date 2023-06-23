@@ -368,6 +368,10 @@ func (e *Entry) Any(key string, val interface{}) *Entry {
 
 // Err add error field to current context
 func (e *Entry) Err(err error) *Entry {
+	if e == nil {
+		return e
+	}
+
 	f := Field{
 		Key:   "error",
 		Value: err.Error(),
