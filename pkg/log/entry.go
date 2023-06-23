@@ -17,17 +17,18 @@ var entryPool = &sync.Pool{
 
 // Entry defines a single log entry
 type Entry struct {
-	Logger    *Logger
-	Level     Level     `json:"level"`
-	Message   string    `json:"message"`
-	CreatedAt time.Time `json:"time"`
-	fields    []*Field
+	Logger  *Logger
+	context context.Context
+	Level   Level  `json:"level"`
+	Message string `json:"message"`
+	fields  []*Field
 }
 
-func newEntry(level Level, l *Logger) *Entry {
+func newEntry(ctx context.Context, level Level, l *Logger) *Entry {
 	e, _ := entryPool.Get().(*Entry)
 	e.Level = level
 	e.Logger = l
+	e.context = ctx
 
 	if len(l.context.fields) > 0 {
 		e.fields = append(e.fields, l.context.fields...)
@@ -39,6 +40,11 @@ func newEntry(level Level, l *Logger) *Entry {
 func putEntry(e *Entry) {
 	e.fields = e.fields[:0]
 	entryPool.Put(e)
+}
+
+// Fields returns entry's fields
+func (e *Entry) Fields() []*Field {
+	return e.fields
 }
 
 // Msg print the message.

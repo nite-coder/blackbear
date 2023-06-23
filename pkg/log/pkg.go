@@ -13,14 +13,7 @@ import (
 var (
 	defaultLogger = new()
 
-	// ErrorHandler is called whenever handler fails to write an event on its
-	// output. If not set, an error is printed on the stderr. This handler must
-	// be thread safe and non-blocking.
-	ErrorHandler func(err error)
 
-	// AutoStaceTrace add stack trace into entry when use `Error`, `Panic`, `Fatal` level.
-	// Default: true
-	AutoStaceTrace = true
 )
 
 func new() atomic.Value {
@@ -49,19 +42,34 @@ func Default() *Logger {
 	return logger
 }
 
-// Debug level formatted message
+// Debug logs at DebugLevel
 func Debug() *Entry {
 	return Default().Debug()
 }
 
-// Info level formatted message
+// DebugCtx logs at LevelDebug with the given context
+func DebugCtx(ctx context.Context) *Entry {
+	return Default().DebugCtx(ctx)
+}
+
+// Info logs at InfoLevel
 func Info() *Entry {
 	return Default().Info()
 }
 
-// Warn level formatted message
+// InfoCtx logs at InfoLevel with the given context
+func InfoCtx(ctx context.Context) *Entry {
+	return Default().InfoCtx(ctx)
+}
+
+// Warn logs at WarnLevel
 func Warn() *Entry {
 	return Default().Warn()
+}
+
+// WarnCtx logs at WarnLevel with the given context.
+func WarnCtx(ctx context.Context) *Entry {
+	return Default().WarnCtx(ctx)
 }
 
 // Error level formatted message
@@ -69,14 +77,29 @@ func Error() *Entry {
 	return Default().Error()
 }
 
+// ErrorCtx logs at ErrorLevel with the given context.
+func ErrorCtx(ctx context.Context) *Entry {
+	return Default().ErrorCtx(ctx)
+}
+
 // Panic level formatted message
 func Panic() *Entry {
 	return Default().Panic()
 }
 
+// PanicCtx logs at PanicLevel with the given context.
+func PanicCtx(ctx context.Context) *Entry {
+	return Default().PanicCtx(ctx)
+}
+
 // Fatal level formatted message, followed by an exit.
 func Fatal() *Entry {
 	return Default().Fatal()
+}
+
+// FatalCtx logs at FatalLevel with the given context.
+func FatalCtx(ctx context.Context) *Entry {
+	return Default().FatalCtx(ctx)
 }
 
 func With() Context {
@@ -108,15 +131,11 @@ func FromContext(ctx context.Context) *Logger {
 
 // Flush clear all handler's buffer
 func Flush() {
-	// for _, h := range Logger().handles {
-	// 	flusher, ok := h.(Flusher)
-	// 	if ok {
-	// 		err := flusher.Flush()
-	// 		if err != nil {
-	// 			stdlog.Printf("log: flush log handler: %v", err)
-	// 		}
-	// 	}
-	// }
+	h := Default().handler
+	flusher, ok := h.(Flusher)
+	if ok {
+		_ = flusher.Flush()
+	}
 }
 
 func getStackTrace() string {

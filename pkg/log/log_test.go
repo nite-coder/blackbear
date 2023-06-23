@@ -46,8 +46,8 @@ type Person struct {
 // }
 
 func TestNoHandler(t *testing.T) {
-	log.Debug().Msg("no handler 1")
-	log.Info().Msg("no handler 2")
+	log.Info().Msg("no handler 1")
+	log.InfoCtx(context.Background()).Msg("no handler 2")
 }
 
 func TestDisableLevel(t *testing.T) {
@@ -197,18 +197,19 @@ func TestFields(t *testing.T) {
 	assert.Equal(t, `{"level":"DEBUG","msg":"test field","string":"hello","strs":["str1","str2"],"bool":true,"int":1,"int8":2,"int16":3,"int32":4,"int64":5,"uint":6,"uint8":7,"uint16":8,"uint32":9,"uint64":10,"float32":11.123,"float64":12.123,"time":"2012-11-01T22:08:41Z","times":["2012-11-01T22:08:41Z","2012-11-01T22:08:41+08:00"],"person":{"Name":"Doge","Age":18}}`+"\n", b.String())
 }
 
-// func TestFlush(t *testing.T) {
-// 	logger := log.New()
+func TestFlush(t *testing.T) {
+	b := buffer.New()
+	defer b.Free()
 
-// 	h := memory.New()
-// 	logger.AddHandler(h, log.GetLevelsFromMinLevel("debug")...)
+	opts := log.HandlerOptions{
+		Level:       log.DebugLevel,
+		DisableTime: true,
+	}
+	log.SetDefault(log.New(log.NewJSONHandler(b, &opts)))
 
-// 	log.SetLogger(logger)
-
-// 	log.Debug("flush")
-// 	log.Flush()
-// 	assert.Equal(t, 0, len(h.Out))
-// }
+	log.Debug().Msg("flush")
+	log.Flush()
+}
 
 func TestStdContext(t *testing.T) {
 	b := buffer.New()

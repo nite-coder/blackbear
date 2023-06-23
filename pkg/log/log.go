@@ -2,7 +2,6 @@ package log
 
 import (
 	"context"
-	"time"
 )
 
 // Flusher is an interface that allow handles have the ability to clear buffer and close connection
@@ -33,58 +32,104 @@ func (l *Logger) log(ctx context.Context, e *Entry) {
 		ctx = context.Background()
 	}
 
-	e.CreatedAt = time.Now()
-
 	_ = l.handler.Handle(ctx, e)
 	putEntry(e)
 }
 
-// Debug level formatted message
+// Debug logs at DebugLevel
 func (l *Logger) Debug() *Entry {
 	if !l.handler.Enabled(context.TODO(), DebugLevel) {
 		return nil
 	}
-	return newEntry(DebugLevel, l)
+	return newEntry(context.TODO(), DebugLevel, l)
 }
 
-// Info level formatted message
+// DebugCtx logs at LevelDebug with the given context
+func (l *Logger) DebugCtx(ctx context.Context) *Entry {
+	if !l.handler.Enabled(ctx, DebugLevel) {
+		return nil
+	}
+	return newEntry(ctx, DebugLevel, l)
+}
+
+// Info logs at InfoLevel
 func (l *Logger) Info() *Entry {
 	if !l.handler.Enabled(context.TODO(), InfoLevel) {
 		return nil
 	}
-	return newEntry(InfoLevel, l)
+	return newEntry(context.TODO(), InfoLevel, l)
 }
 
-// Warn level formatted message
+// InfoCtx logs at InfoLevel with the given context
+func (l *Logger) InfoCtx(ctx context.Context) *Entry {
+	if !l.handler.Enabled(ctx, InfoLevel) {
+		return nil
+	}
+	return newEntry(ctx, InfoLevel, l)
+}
+
+// Warn logs at WarnLevel
 func (l *Logger) Warn() *Entry {
 	if !l.handler.Enabled(context.TODO(), WarnLevel) {
 		return nil
 	}
-	return newEntry(WarnLevel, l)
+	return newEntry(context.TODO(), WarnLevel, l)
 }
 
-// Error level formatted message
+// WarnCtx logs at WarnLevel with the given context.
+func (l *Logger) WarnCtx(ctx context.Context) *Entry {
+	if !l.handler.Enabled(context.TODO(), WarnLevel) {
+		return nil
+	}
+	return newEntry(ctx, WarnLevel, l)
+}
+
+// Error logs at ErrorLevel
 func (l *Logger) Error() *Entry {
 	if !l.handler.Enabled(context.TODO(), ErrorLevel) {
 		return nil
 	}
-	return newEntry(ErrorLevel, l)
+	return newEntry(context.TODO(), ErrorLevel, l)
 }
 
-// Panic level formatted message
+// ErrorCtx logs at ErrorLevel with the given context.
+func (l *Logger) ErrorCtx(ctx context.Context) *Entry {
+	if !l.handler.Enabled(context.TODO(), ErrorLevel) {
+		return nil
+	}
+	return newEntry(ctx, ErrorLevel, l)
+}
+
+// Panic logs at PanicLevel
 func (l *Logger) Panic() *Entry {
 	if !l.handler.Enabled(context.TODO(), PanicLevel) {
 		return nil
 	}
-	return newEntry(PanicLevel, l)
+	return newEntry(context.TODO(), PanicLevel, l)
 }
 
-// Fatal level formatted message, followed by an exit.
+// PanicCtx logs at PanicLevel with the given context.
+func (l *Logger) PanicCtx(ctx context.Context) *Entry {
+	if !l.handler.Enabled(context.TODO(), PanicLevel) {
+		return nil
+	}
+	return newEntry(ctx, PanicLevel, l)
+}
+
+// Fatal logs at FatalLevel
 func (l *Logger) Fatal() *Entry {
 	if !l.handler.Enabled(context.TODO(), FatalLevel) {
 		return nil
 	}
-	return newEntry(FatalLevel, l)
+	return newEntry(context.TODO(), FatalLevel, l)
+}
+
+// FatalCtx logs at FatalLevel with the given context.
+func (l *Logger) FatalCtx(ctx context.Context) *Entry {
+	if !l.handler.Enabled(context.TODO(), FatalLevel) {
+		return nil
+	}
+	return newEntry(ctx, FatalLevel, l)
 }
 
 func (l *Logger) With() Context {

@@ -1,4 +1,4 @@
-package console
+package text
 
 // TODO: we need to disable timestamp feature for testing
 // func Example_log() {
