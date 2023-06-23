@@ -1,4 +1,4 @@
-package text
+package log
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/nite-coder/blackbear/pkg/log"
 )
 
 // color: https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
@@ -40,21 +39,21 @@ func levelToColor(level string) *color.Color {
 	}
 }
 
-// Handler is an instance of the text handler
-type Handler struct {
+// TextHandler is an instance of the text handler
+type TextHandler struct {
 	mu     sync.Mutex
 	writer io.Writer
 
-	opts *log.HandlerOptions
+	opts *HandlerOptions
 }
 
 // New create a new Console instance
-func New(w io.Writer, opts *log.HandlerOptions) *Handler {
+func NewTextHandler(w io.Writer, opts *HandlerOptions) *TextHandler {
 	if w == nil {
 		w = io.Discard
 	}
 
-	h := Handler{
+	h := TextHandler{
 		writer: w,
 		opts:   opts,
 	}
@@ -69,12 +68,12 @@ func New(w io.Writer, opts *log.HandlerOptions) *Handler {
 
 // Enabled reports whether the handler handles records at the given level.
 // The handler ignores records whose level is lower.
-func (h *Handler) Enabled(_ context.Context, level log.Level) bool {
+func (h *TextHandler) Enabled(_ context.Context, level Level) bool {
 	return level >= h.opts.Level
 }
 
 // Handle formats its argument Record as a text object on a single line.
-func (h *Handler) Handle(_ context.Context, e *log.Entry) error {
+func (h *TextHandler) Handle(_ context.Context, e *Entry) error {
 
 	level := e.Level.String()
 	levelColor := levelToColor(level)

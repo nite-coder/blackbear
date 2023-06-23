@@ -1,7 +1,9 @@
-# log 
+# log
 
-It is a simple structured logging package for Go. 
+It is a simple structured logging package for Go.
+
 ## Features
+
 * fast, easy to use, and pretty logging for development
 * low to zero allocation
 * JSON encoding format
@@ -9,11 +11,13 @@ It is a simple structured logging package for Go.
 * `context.Context` integration
 
 ## Handlers
+
 * Text (development use)
-* JSON (default)
+* JSON (default, Production)
 
 ## Installation
-Use go get 
+
+Use go get
 
 ```go
 go get -u github.com/nite-coder/blackbear
@@ -25,50 +29,53 @@ go get -u github.com/nite-coder/blackbear
 package main
 
 import (
-	"os"
+ "os"
 
-	"github.com/nite-coder/blackbear/pkg/log"
-	"github.com/nite-coder/blackbear/pkg/log/handler/text"
+ "github.com/nite-coder/blackbear/pkg/log"
+ "github.com/nite-coder/blackbear/pkg/log/handler/text"
 )
 
 func main() {
-	// json handler
-	log.Debug().Msg("Hello World") // {"time":"2023-06-23T06:17:43Z","level":"DEBUG","msg":"Hello World"}
+ // json handler
+ log.Debug().Msg("Hello World") // output: {"time":"2023-06-23T06:17:43Z","level":"DEBUG","msg":"Hello World"}
 
-	// text handler
-	opts := log.HandlerOptions{
-		Level:       log.DebugLevel,
-		DisableTime: true,
-	}
-	logger := log.New(text.New(os.Stderr, &opts))
-	log.SetDefault(logger)
-	log.Debug().Msg("Hello World") // 06:17:43.991 DEBUG  Hello World
+ // text handler
+ opts := log.HandlerOptions{
+  Level:       log.DebugLevel,
+  DisableTime: true,
+ }
+ logger := log.New(text.New(os.Stderr, &opts))
+ log.SetDefault(logger)
+ log.Debug().Msg("Hello World") // output: 06:17:43.991 DEBUG  Hello World
 }
 ```
+
 ### Fields
+
 ```go
 package main
 
 import (
-	"github.com/nite-coder/blackbear/pkg/log"
+ "github.com/nite-coder/blackbear/pkg/log"
 )
 
 func main() {
     // example1
-	logger := log.With().Str("app_id", "blackbear").Logger()
-	logger.Debug().Msg("Hello World")
+    logger := log.With().Str("app_id", "blackbear").Logger()
+    logger.Debug().Msg("Hello World")
 
     // example2
     log.Debug().Str("request_id", "abc").Msg("cool")
-    
 }
 ```
+
 ### Pass Context
+
 ```go
 package main
 
 import (
-	"github.com/nite-coder/blackbear/pkg/log"
+ "github.com/nite-coder/blackbear/pkg/log"
 )
 
 func main() {
@@ -76,3 +83,5 @@ func main() {
     log.DebugCtx(ctx).Str("request_id", "abc").Msg("cool")
 }
 ```
+
+insipred by zerolog

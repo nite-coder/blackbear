@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/nite-coder/blackbear/pkg/log"
-	"github.com/nite-coder/blackbear/pkg/log/handler/text"
 )
 
 // We pass Attrs (or zap.Fields) inline because it affects allocations: building
@@ -25,7 +24,7 @@ func BenchmarkHandles(b *testing.B) {
 		h    log.Handler
 	}{
 		{"disabled", disabledHandler{}},
-		{"Text discard", text.New(io.Discard, &opts)},
+		{"Text discard", log.NewTextHandler(io.Discard, &opts)},
 		{"JSON discard", log.NewJSONHandler(io.Discard, &opts)},
 	} {
 		logger := log.New(handler.h)

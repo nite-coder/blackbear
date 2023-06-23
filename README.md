@@ -5,7 +5,7 @@ A Go light framework helps to develop your application faster.
 
 * `logging` - a structured logger library, support console, JSON, Graylog output/handles
 * `config` - config management library, support JSON, YAML format and env, file as data sources
-* `web` - a HTTP web framework
+* `web` - a HTTP web framework (deprecated)
 * `request` - a HTTP Client library.  The syntax looks like SuperAgent
 * `cache` - a cache lirary 
 * `cast` - a library to convert between different go types in a consistent and easy way
