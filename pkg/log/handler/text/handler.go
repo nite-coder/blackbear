@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"sync"
 	"time"
 
@@ -52,7 +51,7 @@ type Handler struct {
 // New create a new Console instance
 func New(w io.Writer, opts *log.HandlerOptions) *Handler {
 	if w == nil {
-		w = ioutil.Discard
+		w = io.Discard
 	}
 
 	h := Handler{

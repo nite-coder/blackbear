@@ -3,7 +3,6 @@ package log
 import (
 	"context"
 	"io"
-	"io/ioutil"
 	"net"
 	"sync"
 	"time"
@@ -49,7 +48,7 @@ type JSONHandler struct {
 
 func NewJSONHandler(w io.Writer, opts *HandlerOptions) *JSONHandler {
 	if w == nil {
-		w = ioutil.Discard
+		w = io.Discard
 	}
 
 	return &JSONHandler{
