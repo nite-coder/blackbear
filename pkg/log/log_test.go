@@ -221,6 +221,13 @@ func TestStdContext(t *testing.T) {
 	}
 	log.SetDefault(log.New(log.NewJSONHandler(b, &opts)))
 
+	for i := 0; i < 2; i++ {
+		logger1 := log.With().Int("num", i).Logger()
+		logger1.Debug().Msg("aaa")
+	}
+	assert.Equal(t, `{"level":"DEBUG","msg":"aaa","num":0}`+"\n"+`{"level":"DEBUG","msg":"aaa","num":1}`+"\n", b.String())
+	b.Reset()
+
 	t.Run("create new context", func(t *testing.T) {
 		ctx := context.Background()
 		ctx = log.With().Str("request_id", "abc").Logger().WithContext(ctx)
