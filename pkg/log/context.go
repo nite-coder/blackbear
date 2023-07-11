@@ -11,9 +11,16 @@ type Context struct {
 }
 
 func newContext(l *Logger) Context {
-	l.context = Context{
-		logger: l,
-		fields: make([]*Field, 0, 5),
+	if len(l.context.fields) > 0 {
+		l.context = Context{
+			logger: l,
+			fields: l.context.fields,
+		}
+	} else {
+		l.context = Context{
+			logger: l,
+			fields: make([]*Field, 0, 5),
+		}
 	}
 
 	return l.context

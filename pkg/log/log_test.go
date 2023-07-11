@@ -148,7 +148,9 @@ func TestFields(t *testing.T) {
 	time1, _ := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 	time2, _ := time.Parse(time.RFC3339, "2012-11-01T22:08:41+08:00")
 
-	logger := log.With().
+	logger := log.With().Str("request_id", "abc").Logger()
+
+	logger = logger.With().
 		Str("string", "hello").
 		Strs("strs", []string{"str1", "str2"}).
 		Bool("bool", true).
@@ -170,7 +172,7 @@ func TestFields(t *testing.T) {
 		Logger()
 
 	logger.Info().Msg("test field")
-	assert.Equal(t, `{"level":"INFO","msg":"test field","string":"hello","strs":["str1","str2"],"bool":true,"int":1,"int8":2,"int16":3,"int32":4,"int64":5,"uint":6,"uint8":7,"uint16":8,"uint32":9,"uint64":10,"float32":11.123,"float64":12.123,"time":"2012-11-01T22:08:41Z","times":["2012-11-01T22:08:41Z","2012-11-01T22:08:41+08:00"],"person":{"Name":"Doge","Age":18}}`+"\n", b.String())
+	assert.Equal(t, `{"level":"INFO","msg":"test field","request_id":"abc","string":"hello","strs":["str1","str2"],"bool":true,"int":1,"int8":2,"int16":3,"int32":4,"int64":5,"uint":6,"uint8":7,"uint16":8,"uint32":9,"uint64":10,"float32":11.123,"float64":12.123,"time":"2012-11-01T22:08:41Z","times":["2012-11-01T22:08:41Z","2012-11-01T22:08:41+08:00"],"person":{"Name":"Doge","Age":18}}`+"\n", b.String())
 	b.Reset()
 
 	log.Debug().
