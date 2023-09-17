@@ -11,7 +11,7 @@ func TestCache(t *testing.T) {
 	cache := NewCache[string, int](time.Minute)
 
 	// Set a value
-	cache.Set("foo", 42, time.Second)
+	cache.PutWithTTL("foo", 42, time.Second)
 
 	// Check that the value is retrievable
 	val, ok := cache.Get("foo")
@@ -26,7 +26,7 @@ func TestCache(t *testing.T) {
 	assert.False(t, ok)
 
 	// Set a value with no expiration
-	cache.Set("bar", 99, NoExpiration)
+	cache.Put("bar", 99)
 
 	// Check that the value is still retrievable after some time
 	time.Sleep(time.Second)
@@ -41,12 +41,12 @@ func TestCache(t *testing.T) {
 
 	// Check that the cache count is correct
 	assert.Equal(t, 0, cache.Count())
-	cache.Set("baz", 123, time.Minute)
+	cache.PutWithTTL("baz", 123, time.Minute)
 	assert.Equal(t, 1, cache.Count())
 
 	// Stop the cache cleanup routine and check that it stops
 	cache.StopCleanup()
 	time.Sleep(time.Second)
-	cache.Set("qux", 456, time.Minute)
+	cache.PutWithTTL("qux", 456, time.Minute)
 	assert.Equal(t, 2, cache.Count())
 }
