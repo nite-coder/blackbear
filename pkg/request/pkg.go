@@ -1,6 +1,12 @@
 package request
 
-import "net/http"
+import (
+	"errors"
+	"io"
+	"net"
+	"net/http"
+	"syscall"
+)
 
 // New create a new RequestAgent instance
 func New() Agent {
@@ -35,4 +41,15 @@ func DELETE(url string) Agent {
 // SetMethod return RequestAgent that uses HTTP method with target URL
 func SetMethod(method, targetURL string) Agent {
 	return newAgentWithClient(_httpClient).SetMethod(method, targetURL)
+}
+
+func IsConnClosedError(err error) bool {
+	switch {
+	case errors.Is(err, net.ErrClosed),
+		errors.Is(err, io.EOF),
+		errors.Is(err, syscall.EPIPE):
+		return true
+	default:
+		return false
+	}
 }
