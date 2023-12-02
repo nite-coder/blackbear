@@ -2,6 +2,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"encoding/xml"
 	"io"
@@ -68,6 +69,11 @@ func TestBodyJSON(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	_, err = POST(ts.URL).SendJSON(c).EndCtx(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestBodyXML(t *testing.T) {
@@ -99,6 +105,11 @@ func TestBodyXML(t *testing.T) {
 
 	ts := httptest.NewServer(handler)
 	_, err := PUT(ts.URL).SendXML(c).End()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = PUT(ts.URL).SendXML(c).EndCtx(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}

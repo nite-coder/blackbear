@@ -9,10 +9,10 @@ A human readable and easy to use request package for Go
 * timeout support (default is 30 seconds)
 * allow to set proxy
 
-
 ## Usages
 
 get request
+
 ```golang
 resp, err := request.
     GET("/v1/hello").
@@ -34,7 +34,7 @@ get request with header
 ```golang
 resp, err := request.
     GET("/v1/hello").
-    Set("Authorization", "token") // your token
+    Header("Authorization", "token") // your token
     End()
     
 if err != nil {
@@ -85,7 +85,5 @@ if resp.OK {
     ....
 }
 ```
-
-
 
 inspire by superAgent

@@ -200,19 +200,34 @@ func (a Agent) Send(body string) Agent {
 	return newAgent.SendBytes([]byte(body))
 }
 
+
+// EndCtx executes the EndCtx function.
+//
+// It takes a context.Context parameter and returns a *Response and an error.
+func (a Agent) EndCtx(ctx context.Context) (*Response, error) {
+	return a.execute(ctx)
+}
+
 // End start execute agent
 func (a Agent) End() (*Response, error) {
-	if a.err != nil {
-		return nil, a.err
-	}
-
 	ctx := context.Background()
-
 	ctx, cancel := context.WithCancel(ctx)
+
 	if a.Timeout > 0 {
 		ctx, cancel = context.WithTimeout(ctx, a.Timeout)
 	}
 	defer cancel()
+	return a.execute(ctx)
+}
+
+
+// execute executes the Agent's request and returns the response.
+//
+// It takes a context.Context as the parameter and returns a *Response and an error.
+func (a Agent) execute(ctx context.Context) (*Response, error) {
+	if a.err != nil {
+		return nil, a.err
+	}
 
 	// create new request
 	url := a.URL

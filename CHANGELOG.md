@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2023-12-02
+
+- request: add `EndCtx` function which allow user to pass context with deadline
+
 ## 2023-06-23
 
 - log: redesign log package v3
