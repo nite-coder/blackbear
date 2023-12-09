@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2023-12-09
+
+- connpool: add new connection pool package
+
 ## 2023-12-02
 
 - request: add `EndCtx` function which allow user to pass context with deadline
