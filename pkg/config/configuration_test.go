@@ -51,6 +51,14 @@ web:
 book:
   book1: john
   book2: angela
+
+entryPoint:
+  web:
+    address: ":80"
+    reusePort: true
+  internal:
+    address: ":8080"
+    reusePort: true
 `
 )
 

@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unsafe"
 )
 
 var ErrNegativeNotAllowed = errors.New("unable to cast negative value")
@@ -950,4 +951,15 @@ func ToFloat64Slice(i interface{}) ([]float64, error) {
 func jsonStringToObject(s string, v interface{}) error {
 	data := []byte(s)
 	return json.Unmarshal(data, v)
+}
+
+// b2s converts byte slice to a string without memory allocation.
+// See https://groups.google.com/forum/#!msg/Golang-Nuts/ENgbUzYvCuU/90yGx7GUAgAJ .
+func B2S(b []byte) string {
+	return unsafe.String(unsafe.SliceData(b), len(b))
+}
+
+// s2b converts string to a byte slice without memory allocation.
+func S2B(s string) []byte {
+	return unsafe.Slice(unsafe.StringData(s), len(s))
 }

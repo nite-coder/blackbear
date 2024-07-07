@@ -45,6 +45,12 @@ func TestRouterParameterRoute(t *testing.T) {
 		c.SetStatus(200)
 		return nil
 	})
+	router.Add(GET, "/users/:name1/", func(c *Context) error {
+		name = c.Param("name")
+		age = c.Query("age")
+		c.SetStatus(200)
+		return nil
+	})
 	s.Use(router)
 
 	req, _ := http.NewRequest("GET", "/users/john?age=18", nil)
