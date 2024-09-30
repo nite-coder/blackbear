@@ -44,7 +44,7 @@ func (c *Cache[K, V]) Get(key K) (V, bool) {
 
 	item := value.(item[V])
 
-	if item.expiration != 0 && item.expiration < int(time.Now().Unix()) {
+	if item.expiration != 0 && item.expiration < int(time.Now().UnixNano()) {
 		c.store.Delete(key)
 		return item.value, false
 	}
@@ -58,7 +58,7 @@ func (c *Cache[K, V]) PutWithTTL(key K, value V, ttl time.Duration) {
 	if ttl == NoExpiration {
 		exp = 0
 	} else {
-		exp = int(time.Now().Add(ttl).Unix())
+		exp = int(time.Now().Add(ttl).UnixNano())
 	}
 
 	c.store.Store(key, item[V]{value, exp})
@@ -107,7 +107,7 @@ func (c *Cache[K, V]) cleanupExpired() {
 		case <-ticker.C:
 			c.store.Range(func(key, value interface{}) bool {
 				item := value.(item[V])
-				if item.expiration != 0 && item.expiration < int(time.Now().Unix()) {
+				if item.expiration != 0 && item.expiration < int(time.Now().UnixNano()) {
 					c.store.Delete(key)
 				}
 				return true

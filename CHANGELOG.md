@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2024-09-30
+
+- cache/v2: use nano for expiration
+
 ## 2023-12-09
 
 - connpool: add new connection pool package
