@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2026-03-30
+
+- cache/v2: LRU cache supports generic key type
+
 ## 2024-09-30
 
 - cache/v2: use nano for expiration

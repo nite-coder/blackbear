@@ -8,7 +8,7 @@ import (
 
 func TestLRUCache(t *testing.T) {
 	// Create a new LRU cache with a capacity of 2 items
-	cache := NewLRUCache[int](2)
+	cache := NewLRUCache[string, int](2)
 
 	// Add some items to the cache
 	cache.Put("key1", 1)
@@ -51,4 +51,37 @@ func TestLRUCache(t *testing.T) {
 
 	// Check that the cache is empty
 	assert.Equal(t, 0, cache.Len())
+}
+
+func TestLRUCacheWithIntKey(t *testing.T) {
+	// Create a new LRU cache with a capacity of 2 items
+	cache := NewLRUCache[int, string](2)
+
+	// Add some items to the cache
+	cache.Put(1, "value1")
+	cache.Put(2, "value2")
+
+	// Check the length of the cache
+	assert.Equal(t, 2, cache.Len())
+
+	// Retrieve an item from the cache
+	value, ok := cache.Get(1)
+	assert.True(t, ok)
+	assert.Equal(t, "value1", value)
+
+	// Add another item to the cache
+	cache.Put(3, "value3")
+
+	// Check that the least recently used item was removed
+	_, ok = cache.Get(2)
+	assert.False(t, ok)
+
+	// Check that the remaining items are still in the cache
+	value, ok = cache.Get(1)
+	assert.True(t, ok)
+	assert.Equal(t, "value1", value)
+
+	value, ok = cache.Get(3)
+	assert.True(t, ok)
+	assert.Equal(t, "value3", value)
 }
